@@ -92,8 +92,11 @@ export function generateShowData(): ShowData {
 
   // --- Song 1: "Sing, Sing, Sing" — 6 Pictures, full company, one mic handoff. ---
   const song1Ids = ids;
-  const holderA = song1Ids[0];
-  const holderB = song1Ids[1];
+  // Picked from the middle of the roster so both carriers are out on stage
+  // (the first few ids are the ones tucked into the wings) and far enough
+  // apart that the handoff is easy to watch.
+  const holderA = song1Ids[60];
+  const holderB = song1Ids[85];
 
   const song1Pictures: Picture[] = [
     {

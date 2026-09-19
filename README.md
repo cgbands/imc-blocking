@@ -5,11 +5,11 @@ today; built so it can later mount as `<BlockingApp />` inside the member portal
 Airtable as the data source (see [`docs/AIRTABLE.md`](docs/AIRTABLE.md), coming in a
 later phase).
 
-**Status: Phase 3 of 6** — responsive glass/bento shell, 106-person seeded stage,
+**Status: Phase 4 of 6** — responsive glass/bento shell, 106-person seeded stage,
 pinch/pan/wheel zoom, PWA basics, setlist/Picture navigation with play/pause,
-scrubbing and animated transitions, and a full editor (drag, multi-select,
-align/distribute, props, stage/riser setup, undo/redo, keyboard shortcuts).
-Mic handoff and Find Me land in Phases 4 and 5.
+scrubbing and animated transitions, a full editor (drag, multi-select,
+align/distribute, props, stage/riser setup, undo/redo, keyboard shortcuts), and
+mic hold/handoff/placement. Find Me and attendance notes land in Phase 5.
 
 ## Run it
 
@@ -78,6 +78,9 @@ Log in as an editor and you get a toolbar above the stage plus an Inspector pane
   reorder from the Setlist.
 - **Stage setup**: stage size, riser rows/columns/size/gaps, which perimeter
   edges have stairs, grid spacing (off / 1 / 2 / 5 ft) and snap-to-grid.
+- **Mics**: select a person and use the Inspector's Mics section to hand a mic
+  to them, hand it off from whoever has it, or put it down. A mic nobody is
+  holding can be dragged anywhere (including onto a mic-stand spot).
 - **Undo/redo**: Cmd/Ctrl+Z and Cmd/Ctrl+Shift+Z. Press `?` for the full
   shortcut list.
 
@@ -100,6 +103,11 @@ future Stage Setup editor (Phase 3) can expose the same config as number inputs.
   every person, prop, and mic at one moment.
 - **Wings**: people in the wings zones (drawn beside the main stage) are off-stage but
   still considered part of the Picture — they're just not physically on the risers/floor.
+- **Mics**: a mic is an independent object. While someone holds it, its position is
+  *derived* from that person's icon, so it follows them through transitions for free.
+  A handoff eases the mic from the giver to the taker while both are still moving.
+  Mic changes apply from the current Picture forward, since a mic doesn't jump back
+  to a previous carrier.
 
 ## Project layout
 

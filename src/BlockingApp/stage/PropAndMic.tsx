@@ -49,14 +49,25 @@ interface MicNodeProps {
   mic: Mic;
   x: number;
   y: number;
+  /** null when the mic is standing on its own */
+  holderMemberId?: string | null;
+  handingOff?: boolean;
 }
 
-export const MicNode = memo(function MicNode({ mic, x, y }: MicNodeProps) {
+export const MicNode = memo(function MicNode({ mic, x, y, holderMemberId, handingOff }: MicNodeProps) {
+  const held = holderMemberId != null;
+  // Held mics ride on a person's icon, so they're drawn smaller and without
+  // the floor stand.
+  const scale = held ? 0.72 : 1;
   return (
-    <g transform={`translate(${x}, ${y})`}>
-      <rect x={-0.07} y={0.25} width={0.14} height={0.9} fill="#3a3a3a" />
-      <circle r={0.32} fill="#1f1f1f" stroke="#fff" strokeWidth={0.05} />
-      <text className="propLabel" y={-0.55} textAnchor="middle" fontSize={0.7}>
+    <g data-mic-id={mic.id} data-held={held || undefined} transform={`translate(${x}, ${y})`}>
+      <g transform={`scale(${scale})`}>
+        {!held && <rect x={-0.07} y={0.25} width={0.14} height={0.9} fill="#3a3a3a" />}
+        {handingOff && <circle r={0.55} className="micHandoffRing" />}
+        <circle r={0.32} fill="#1f1f1f" stroke="#fff" strokeWidth={0.06} />
+        <circle r={0.13} fill="#9aa4ad" />
+      </g>
+      <text className="propLabel micLabel" y={-0.62} textAnchor="middle" fontSize={0.7}>
         {mic.label}
       </text>
     </g>

@@ -54,6 +54,17 @@
   pointer-events: none;
 }
 
+.wrapper :global(.micHandoffRing) {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 0.12;
+  opacity: 0.85;
+}
+
+.wrapper :global([data-mic-id]:not([data-held])) {
+  cursor: grab;
+}
+
 .wrapper :global(.selectionRing) {
   fill: none;
   stroke: var(--accent);

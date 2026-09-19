@@ -1,4 +1,4 @@
-import type { Member, PersonShape, Prop, PropKind } from "../../types";
+import type { Member, Mic, MicPlacement, PersonShape, Prop, PropKind } from "../../types";
 import type { SelectionState } from "../editor/useEditor";
 import styles from "./editor.module.css";
 
@@ -9,20 +9,26 @@ interface InspectorProps {
   selection: SelectionState;
   membersById: Map<string, Member>;
   propsById: Map<string, Prop>;
+  mics: Mic[];
+  micPlacements: MicPlacement[];
   canEdit: boolean;
   onUpdateMember: (member: Member) => void;
   onUpdateProp: (prop: Prop) => void;
   onDeleteProp: (propId: string) => void;
+  onAssignMic: (micId: string, memberId: string | null) => void;
 }
 
 export function Inspector({
   selection,
   membersById,
   propsById,
+  mics,
+  micPlacements,
   canEdit,
   onUpdateMember,
   onUpdateProp,
   onDeleteProp,
+  onAssignMic,
 }: InspectorProps) {
   const count = selection.memberIds.length + selection.propIds.length;
 
@@ -78,6 +84,39 @@ export function Inspector({
                 onChange={(tagColor) => onUpdateMember({ ...member, tagColor })}
               />
               <p className={styles.inspectorHint}>Shape, colour and tag stay with this person across every Picture.</p>
+
+              <h3 className={styles.setupHeading}>Mics</h3>
+              {mics.map((mic) => {
+                const placement = micPlacements.find((m) => m.micId === mic.id);
+                const heldByThisPerson = placement?.holderMemberId === member.id;
+                const otherHolder = placement?.holderMemberId ? membersById.get(placement.holderMemberId) : null;
+                return (
+                  <div key={mic.id} className={styles.micRow}>
+                    <div>
+                      <div className={styles.micName}>{mic.label}</div>
+                      <div className={styles.inspectorHint}>
+                        {heldByThisPerson
+                          ? "Held by this person"
+                          : otherHolder
+                            ? `Held by ${otherHolder.name}`
+                            : "Standing on its own"}
+                      </div>
+                    </div>
+                    {heldByThisPerson ? (
+                      <button className={styles.chip} onClick={() => onAssignMic(mic.id, null)}>
+                        Put down
+                      </button>
+                    ) : (
+                      <button className={styles.chip} onClick={() => onAssignMic(mic.id, member.id)}>
+                        {otherHolder ? "Hand off here" : "Pick up"}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+              <p className={styles.inspectorHint}>
+                Mic changes apply from this Picture onward. Drag a mic that nobody is holding to reposition it.
+              </p>
             </>
           )}
         </div>

@@ -30,6 +30,7 @@ interface UseEditorArgs {
   currentSongId: string | null;
   songPictures: Picture[];
   currentPicture: Picture | undefined;
+  currentPictureIndex: number;
   stageConfig: StageConfig | undefined;
   props: Prop[];
   songs: Song[];
@@ -42,6 +43,7 @@ export function useEditor({
   currentSongId,
   songPictures,
   currentPicture,
+  currentPictureIndex,
   stageConfig,
   props,
   songs,
@@ -332,6 +334,52 @@ export function useEditor({
     [apply, currentPicture, currentSongId, snapValue],
   );
 
+  // --- Mics ---------------------------------------------------------------
+
+  const moveMicsTo = useCallback(
+    (moves: { micId: string; x: number; y: number }[]) => {
+      if (!currentPicture || !currentSongId || moves.length === 0) return;
+      const byId = new Map(moves.map((m) => [m.micId, m]));
+      const after: Picture = {
+        ...currentPicture,
+        mics: currentPicture.mics.map((m) => {
+          const move = byId.get(m.micId);
+          return move ? { ...m, x: snapValue(move.x), y: snapValue(move.y) } : m;
+        }),
+      };
+      apply({ kind: "picture", songId: currentSongId, before: currentPicture, after });
+    },
+    [apply, currentPicture, currentSongId, snapValue],
+  );
+
+  /**
+   * Hands a mic to someone (or puts it down when memberId is null) from the
+   * current Picture onward — a mic doesn't jump back to a previous carrier, so
+   * the change carries forward through the rest of the song.
+   */
+  const assignMic = useCallback(
+    (micId: string, memberId: string | null) => {
+      if (!currentSongId || !currentPicture) return;
+      const dropped = currentPicture.people.find(
+        (p) => p.memberId === currentPicture.mics.find((m) => m.micId === micId)?.holderMemberId,
+      );
+      const after = songPictures.map((picture, i) => {
+        if (i < currentPictureIndex) return picture;
+        return {
+          ...picture,
+          mics: picture.mics.map((m) => {
+            if (m.micId !== micId) return m;
+            // Releasing leaves it standing where its carrier was.
+            const resting = memberId === null && dropped ? { x: dropped.x, y: dropped.y } : { x: m.x, y: m.y };
+            return { ...m, holderMemberId: memberId, ...resting };
+          }),
+        };
+      });
+      apply({ kind: "songPictures", songId: currentSongId, before: songPictures, after });
+    },
+    [apply, currentPicture, currentPictureIndex, currentSongId, songPictures],
+  );
+
   // --- Members (shape / colour / tag are person-level, not per-Picture) ----
 
   const updateMember = useCallback(
@@ -430,6 +478,8 @@ export function useEditor({
     snapValue,
     movePeopleTo,
     movePropsTo,
+    moveMicsTo,
+    assignMic,
     nudgeSelection,
     removeSelectionFromPicture,
     alignSelection,

@@ -1,4 +1,4 @@
-import type { Member, Mic, Picture, Prop, PropKind, Song, StageConfig } from "../../types";
+import type { Member, Mic, MicPlacement, Picture, Prop, PropKind, Song, StageConfig } from "../../types";
 import type { SelectionState } from "../editor/useEditor";
 
 export interface LayoutProps {
@@ -48,6 +48,10 @@ export interface LayoutProps {
   onSelectionChange: (selection: SelectionState) => void;
   onMovePeople: (moves: { memberId: string; x: number; y: number }[]) => void;
   onMoveProps: (moves: { propId: string; x: number; y: number }[]) => void;
+  onMoveMics: (moves: { micId: string; x: number; y: number }[]) => void;
+  onAssignMic: (micId: string, memberId: string | null) => void;
+  mics: Mic[];
+  micPlacements: MicPlacement[];
   snapValue: (v: number) => number;
   canUndo: boolean;
   canRedo: boolean;

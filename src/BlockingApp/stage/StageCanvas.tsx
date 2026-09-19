@@ -3,7 +3,7 @@ import type { Member, Mic, Picture, Prop, StageConfig } from "../../types";
 import type { SelectionState } from "../editor/useEditor";
 import { Person } from "./Person";
 import { PropNode, MicNode } from "./PropAndMic";
-import { interpolateMics, interpolatePeople, interpolateProps } from "./interpolate";
+import { interpolatePeople, interpolateProps, resolveMics } from "./interpolate";
 import styles from "./StageCanvas.module.css";
 
 interface StageCanvasProps {
@@ -27,6 +27,7 @@ interface StageCanvasProps {
   onSelectionChange?: (selection: SelectionState) => void;
   onMovePeople?: (moves: { memberId: string; x: number; y: number }[]) => void;
   onMoveProps?: (moves: { propId: string; x: number; y: number }[]) => void;
+  onMoveMics?: (moves: { micId: string; x: number; y: number }[]) => void;
   snapValue?: (v: number) => number;
 }
 
@@ -57,6 +58,7 @@ export function StageCanvas({
   onSelectionChange,
   onMovePeople,
   onMoveProps,
+  onMoveMics,
   snapValue = (v) => v,
 }: StageCanvasProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -88,6 +90,7 @@ export function StageCanvas({
     startFeet: { x: number; y: number };
     people: DragEntry[];
     props: DragEntry[];
+    mics: DragEntry[];
     moved: boolean;
     hitMemberId: string | null;
     additive: boolean;
@@ -197,7 +200,11 @@ export function StageCanvas({
 
   const people = useMemo(() => interpolatePeople(picture, nextPicture, progress), [picture, nextPicture, progress]);
   const propPlacements = useMemo(() => interpolateProps(picture, nextPicture, progress), [picture, nextPicture, progress]);
-  const micPlacements = useMemo(() => interpolateMics(picture, nextPicture, progress), [picture, nextPicture, progress]);
+  const peopleNow = useMemo(() => new Map(people.map((p) => [p.memberId, { x: p.x, y: p.y }])), [people]);
+  const micPlacements = useMemo(
+    () => resolveMics(picture, nextPicture, progress, peopleNow),
+    [picture, nextPicture, progress, peopleNow],
+  );
   const nextPeopleById = useMemo(() => new Map((nextPicture?.people ?? []).map((p) => [p.memberId, p])), [nextPicture]);
 
   const selectedMembers = useMemo(() => new Set(selection.memberIds), [selection]);
@@ -208,9 +215,34 @@ export function StageCanvas({
 
   // --- Pointer handling ---------------------------------------------------
 
-  const startObjectDrag = (e: React.PointerEvent<SVGSVGElement>, memberId: string | null, propId: string | null) => {
+  const startObjectDrag = (
+    e: React.PointerEvent<SVGSVGElement>,
+    memberId: string | null,
+    propId: string | null,
+    micId: string | null,
+  ) => {
     const svg = svgRef.current;
     if (!svg || !picture) return false;
+
+    // A mic that someone is holding moves with them; only free mics drag.
+    if (micId) {
+      const placement = picture.mics.find((m) => m.micId === micId);
+      if (!placement || placement.holderMemberId) return false;
+      const el = svg.querySelector<SVGGElement>(`[data-mic-id="${CSS.escape(micId)}"]`);
+      if (!el) return false;
+      dragState.current = {
+        pointerId: e.pointerId,
+        startClient: { x: e.clientX, y: e.clientY },
+        startFeet: screenToFeet(e.clientX, e.clientY),
+        people: [],
+        props: [],
+        mics: [{ id: micId, x: placement.x, y: placement.y, el }],
+        moved: false,
+        hitMemberId: null,
+        additive: false,
+      };
+      return true;
+    }
 
     const additive = e.shiftKey || e.metaKey || e.ctrlKey;
     // Dragging something outside the current selection moves just that thing.
@@ -245,6 +277,7 @@ export function StageCanvas({
       startFeet: screenToFeet(e.clientX, e.clientY),
       people: peopleEntries,
       props: propEntries,
+      mics: [],
       moved: false,
       hitMemberId: memberId,
       additive,
@@ -256,6 +289,7 @@ export function StageCanvas({
     const target = e.target as Element;
     const memberId = target.closest("[data-member-id]")?.getAttribute("data-member-id") ?? null;
     const propId = target.closest("[data-prop-id]")?.getAttribute("data-prop-id") ?? null;
+    const micId = target.closest("[data-mic-id]")?.getAttribute("data-mic-id") ?? null;
 
     svgRef.current?.setPointerCapture?.(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -271,8 +305,8 @@ export function StageCanvas({
     }
     if (pointers.current.size > 2) return;
 
-    // 1. Grabbing a person or prop in edit mode moves it.
-    if (canDragNow && (memberId || propId) && startObjectDrag(e, memberId, propId)) return;
+    // 1. Grabbing a person, prop, or free mic in edit mode moves it.
+    if (canDragNow && (memberId || propId || micId) && startObjectDrag(e, memberId, propId, micId)) return;
 
     // 2. Empty space with a fine pointer in edit mode starts a marquee
     //    (space held, or a non-primary button, falls through to panning).
@@ -313,7 +347,7 @@ export function StageCanvas({
       const dx = feet.x - drag.startFeet.x;
       const dy = feet.y - drag.startFeet.y;
       // Written straight to the DOM: a drag never re-renders the 106 nodes.
-      for (const entry of [...drag.people, ...drag.props]) {
+      for (const entry of [...drag.people, ...drag.props, ...drag.mics]) {
         entry.el.setAttribute("transform", `translate(${snapValue(entry.x + dx)}, ${snapValue(entry.y + dy)})`);
       }
       return;
@@ -359,6 +393,9 @@ export function StageCanvas({
         }
         if (drag.props.length) {
           onMoveProps?.(drag.props.map((p) => ({ propId: p.id, x: p.x + dx, y: p.y + dy })));
+        }
+        if (drag.mics.length) {
+          onMoveMics?.(drag.mics.map((m) => ({ micId: m.id, x: m.x + dx, y: m.y + dy })));
         }
       } else {
         // A tap, not a drag — treat it as a selection change.
@@ -551,7 +588,16 @@ export function StageCanvas({
           {micPlacements.map((placement) => {
             const mic = micsById.get(placement.micId);
             if (!mic) return null;
-            return <MicNode key={mic.id} mic={mic} x={placement.x} y={placement.y} />;
+            return (
+              <MicNode
+                key={mic.id}
+                mic={mic}
+                x={placement.x}
+                y={placement.y}
+                holderMemberId={placement.holderMemberId}
+                handingOff={placement.handingOff}
+              />
+            );
           })}
         </g>
 

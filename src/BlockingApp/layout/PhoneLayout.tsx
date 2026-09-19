@@ -55,6 +55,10 @@ export function PhoneLayout(props: LayoutProps) {
     onSelectionChange,
     onMovePeople,
     onMoveProps,
+    onMoveMics,
+    onAssignMic,
+    mics,
+    micPlacements,
     snapValue,
     canUndo,
     canRedo,
@@ -115,6 +119,7 @@ export function PhoneLayout(props: LayoutProps) {
           onSelectionChange={onSelectionChange}
           onMovePeople={onMovePeople}
           onMoveProps={onMoveProps}
+          onMoveMics={onMoveMics}
           snapValue={snapValue}
         />
         {!canEdit && <FindMeButton floating />}
@@ -143,10 +148,13 @@ export function PhoneLayout(props: LayoutProps) {
             selection={selection}
             membersById={membersById}
             propsById={propsById}
+            mics={mics}
+            micPlacements={micPlacements}
             canEdit={canEdit}
             onUpdateMember={onUpdateMember}
             onUpdateProp={onUpdateProp}
             onDeleteProp={onDeleteProp}
+            onAssignMic={onAssignMic}
           />
         )}
         <SetlistPanel

@@ -53,6 +53,10 @@ export function DesktopLayout(props: LayoutProps) {
     onSelectionChange,
     onMovePeople,
     onMoveProps,
+    onMoveMics,
+    onAssignMic,
+    mics,
+    micPlacements,
     snapValue,
     canUndo,
     canRedo,
@@ -160,6 +164,7 @@ export function DesktopLayout(props: LayoutProps) {
             onSelectionChange={onSelectionChange}
             onMovePeople={onMovePeople}
             onMoveProps={onMoveProps}
+            onMoveMics={onMoveMics}
             snapValue={snapValue}
           />
         </div>
@@ -169,10 +174,13 @@ export function DesktopLayout(props: LayoutProps) {
             selection={selection}
             membersById={membersById}
             propsById={propsById}
+            mics={mics}
+            micPlacements={micPlacements}
             canEdit={canEdit}
             onUpdateMember={onUpdateMember}
             onUpdateProp={onUpdateProp}
             onDeleteProp={onDeleteProp}
+            onAssignMic={onAssignMic}
           />
           {canEdit && <StageSetupPanel stageConfig={stageConfig} onChange={onUpdateStageConfig} />}
         </div>
