@@ -1,0 +1,57 @@
+.root {
+  /* Light-blue glass theme. Structured so a future dark variant is just a
+     second block of these same variable names under a [data-theme="dark"]
+     selector on .root — not attempted yet, per spec (light only for now). */
+  --bg: #eaf3fb;
+  --surface-1: #ffffff;
+  --surface-2: #f2f7fc;
+  --surface-glass: rgba(255, 255, 255, 0.55);
+  --surface-solid-fallback: #f5f9fd;
+  --surface-border: rgba(120, 160, 200, 0.35);
+
+  --text: #1e3a52;
+  --text-strong: #10283c;
+  --text-muted: #5b7186;
+
+  --accent: #2f80c9;
+  --accent-strong: #1c5a92;
+  --accent-soft: rgba(47, 128, 201, 0.16);
+
+  --stage-bg: #dcebf7;
+  --stage-floor: #eef5fb;
+  --stage-floor-edge: #b9d2e6;
+  --stage-riser: #cfe1f0;
+  --stage-riser-edge: #9db9d1;
+  --stage-wing: #c3d6e6;
+  --stage-label: #16324a;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+}
+
+.root,
+.root :global(*) {
+  box-sizing: border-box;
+}
+
+.root button,
+.root select,
+.root input {
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.root svg text {
+  font-family: inherit;
+}

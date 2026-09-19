@@ -1,0 +1,56 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  overscroll-behavior: contain;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--stage-bg);
+}
+
+.svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.floorRect {
+  fill: var(--stage-floor);
+  stroke: var(--stage-floor-edge);
+  stroke-width: 0.1;
+}
+
+.wingRect {
+  fill: var(--stage-wing);
+  opacity: 0.6;
+}
+
+.riserRect {
+  fill: var(--stage-riser);
+  stroke: var(--stage-riser-edge);
+  stroke-width: 0.08;
+}
+
+.wrapper :global(.personLabel) {
+  fill: var(--stage-label);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.wrapper.denseZoom :global(.personLabel) {
+  opacity: 1;
+}
+
+.wrapper :global(.findMePulse) {
+  animation: findMePulse 1.1s ease-in-out infinite;
+}
+
+@keyframes findMePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}

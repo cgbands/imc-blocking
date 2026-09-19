@@ -1,0 +1,39 @@
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--surface-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  transition: height 220ms ease;
+  display: flex;
+  flex-direction: column;
+  z-index: 15;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.handle {
+  border: none;
+  background: transparent;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+}
+
+.handle::before {
+  content: "";
+  width: 40px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--surface-border);
+}
+
+.body {
+  flex: 1;
+  overflow: hidden;
+}
