@@ -35,17 +35,40 @@
   stroke-width: 0.08;
 }
 
+/* Labels are counter-scaled against the current zoom (via --label-font-size,
+   updated on the wrapper whenever the viewBox changes) so they stay at a
+   readable on-screen size no matter how far in or out you are. */
 .wrapper :global(.personLabel),
 .wrapper :global(.propLabel) {
   fill: var(--stage-label);
-  opacity: 0;
+  font-size: var(--label-font-size, 1.2px);
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: var(--label-halo, 0.25px);
+  stroke-linejoin: round;
   pointer-events: none;
-  transition: opacity 120ms ease;
 }
 
-.wrapper.denseZoom :global(.personLabel),
-.wrapper.denseZoom :global(.propLabel) {
-  opacity: 1;
+.wrapper :global(.personLabelTierA) :global(.personLabel) {
+  transform: translateY(var(--label-offset, 2px));
+}
+
+.wrapper :global(.personLabelTierB) :global(.personLabel) {
+  transform: translateY(var(--label-offset-alt, 3.4px));
+}
+
+/* Short first name when zoomed out, full name once there's room. */
+.wrapper :global(.personLabelFull) {
+  display: none;
+}
+
+.wrapper.denseZoom :global(.personLabelFull) {
+  display: block;
+}
+
+.wrapper.denseZoom :global(.personLabelShort) {
+  display: none;
 }
 
 .wrapper :global(.findMePulse) {

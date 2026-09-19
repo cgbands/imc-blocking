@@ -40,6 +40,7 @@ export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initial
   });
   const [currentSongId, setCurrentSongId] = useState<string | null>(null);
   const [showTrails, setShowTrails] = useState(false);
+  const [showNames, setShowNames] = useState(true);
   const [isolatedMemberId, setIsolatedMemberId] = useState<string | null>(null);
 
   const loadAll = async () => {
@@ -114,6 +115,7 @@ export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initial
     nextPicture,
     progress: player.progress,
     isPlaying: player.isPlaying,
+    isAnimating: player.isAnimating,
     playerIndex: player.index,
     canStepPrev: player.canStepPrev,
     canStepNext: player.canStepNext,
@@ -121,8 +123,11 @@ export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initial
     onStepPrev: player.stepPrev,
     onStepNext: player.stepNext,
     onScrub: player.scrubTo,
+    onJumpToPicture: player.jumpTo,
     showTrails,
     onToggleTrails: setShowTrails,
+    showNames,
+    onToggleNames: setShowNames,
 
     members: show.members,
     membersById,

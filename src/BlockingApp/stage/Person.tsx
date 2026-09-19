@@ -52,10 +52,16 @@ interface PersonProps {
   y: number;
   highlighted?: boolean;
   dimmed?: boolean;
+  showName?: boolean;
   onSelect?: (memberId: string) => void;
 }
 
-export const Person = memo(function Person({ member, x, y, highlighted, dimmed, onSelect }: PersonProps) {
+/** "James A." -> "James" — used when zoomed out, where full names collide. */
+function shortName(name: string): string {
+  return name.split(" ")[0];
+}
+
+export const Person = memo(function Person({ member, x, y, highlighted, dimmed, showName, onSelect }: PersonProps) {
   return (
     <g
       transform={`translate(${x}, ${y})`}
@@ -73,14 +79,20 @@ export const Person = memo(function Person({ member, x, y, highlighted, dimmed, 
       <g transform={`translate(${SHAPE_SIZE * 0.32}, ${-SHAPE_SIZE * 0.32})`}>
         <PersonIcon shape={member.tagShape} color={member.tagColor} size={SHAPE_SIZE * 0.45} />
       </g>
-      <text
-        className="personLabel"
-        y={SHAPE_SIZE * 1.4}
-        textAnchor="middle"
-        fontSize={0.85}
-      >
-        {member.name}
-      </text>
+      {showName && (
+        // Labels alternate between two tiers by x position so neighbours in a
+        // packed riser row don't overprint each other.
+        <g className={Math.round(x / 1.2) % 2 === 0 ? "personLabelTierA" : "personLabelTierB"}>
+          {/* Two variants; CSS picks one by zoom level so changing zoom
+              never has to re-render 106 people. */}
+          <text className="personLabel personLabelShort" textAnchor="middle">
+            {shortName(member.name)}
+          </text>
+          <text className="personLabel personLabelFull" textAnchor="middle">
+            {member.name}
+          </text>
+        </g>
+      )}
     </g>
   );
 });

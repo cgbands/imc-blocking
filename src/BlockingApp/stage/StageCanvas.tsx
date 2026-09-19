@@ -16,12 +16,14 @@ interface StageCanvasProps {
   highlightedMemberId?: string | null;
   isolatedMemberId?: string | null;
   showTrails?: boolean;
+  showNames?: boolean;
   onSelectPerson?: (memberId: string) => void;
 }
 
 const MIN_SCALE = 0.6;
 const MAX_SCALE = 8;
 const DENSE_LABEL_THRESHOLD_PX_PER_FT = 22;
+const LABEL_TARGET_PX = 11;
 
 export function StageCanvas({
   stageConfig,
@@ -34,6 +36,7 @@ export function StageCanvas({
   highlightedMemberId,
   isolatedMemberId,
   showTrails,
+  showNames = true,
   onSelectPerson,
 }: StageCanvasProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -65,8 +68,19 @@ export function StageCanvas({
     svg.setAttribute("viewBox", `${cx - w / 2} ${cy - h / 2} ${w} ${h}`);
 
     const pxPerFt = (svg.clientWidth || 1) / w;
-    const dense = pxPerFt >= DENSE_LABEL_THRESHOLD_PX_PER_FT;
-    wrapperRef.current?.classList.toggle(styles.denseZoom, dense);
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    wrapper.classList.toggle(styles.denseZoom, pxPerFt >= DENSE_LABEL_THRESHOLD_PX_PER_FT);
+
+    // Counter-scale label text so it reads at a constant ~11px on screen
+    // regardless of zoom. Driven through CSS vars so zooming never re-renders
+    // the 106 person nodes.
+    const fontFt = Math.min(2.2, Math.max(0.15, LABEL_TARGET_PX / pxPerFt));
+    wrapper.style.setProperty("--label-font-size", `${fontFt}px`);
+    wrapper.style.setProperty("--label-halo", `${fontFt * 0.22}px`);
+    wrapper.style.setProperty("--label-offset", `${0.95 + fontFt * 0.9}px`);
+    wrapper.style.setProperty("--label-offset-alt", `${0.95 + fontFt * 2.05}px`);
   }, [base]);
 
   const scheduleApply = useCallback(() => {
@@ -106,16 +120,26 @@ export function StageCanvas({
     };
   };
 
-  const onWheel = (e: React.WheelEvent<SVGSVGElement>) => {
-    e.preventDefault();
-    const factor = Math.exp(-e.deltaY * 0.0015);
-    const before = screenToFeet(e.clientX, e.clientY);
-    view.current.scale = clampScale(view.current.scale * factor);
-    const after = screenToFeet(e.clientX, e.clientY);
-    view.current.cx += before.x - after.x;
-    view.current.cy += before.y - after.y;
-    scheduleApply();
-  };
+  // Registered natively rather than via onWheel: React attaches wheel
+  // listeners passively, so preventDefault() there is ignored and the page
+  // scrolls behind the stage while zooming.
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const factor = Math.exp(-e.deltaY * 0.0015);
+      const before = screenToFeet(e.clientX, e.clientY);
+      view.current.scale = clampScale(view.current.scale * factor);
+      const after = screenToFeet(e.clientX, e.clientY);
+      view.current.cx += before.x - after.x;
+      view.current.cy += before.y - after.y;
+      scheduleApply();
+    };
+    svg.addEventListener("wheel", onWheel, { passive: false });
+    return () => svg.removeEventListener("wheel", onWheel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [base, scheduleApply]);
 
   const onPointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
     (e.target as Element).setPointerCapture?.(e.pointerId);
@@ -190,7 +214,6 @@ export function StageCanvas({
       <svg
         ref={svgRef}
         className={styles.svg}
-        onWheel={onWheel}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endPointer}
@@ -253,6 +276,7 @@ export function StageCanvas({
                 y={placement.y}
                 highlighted={highlightedMemberId === member.id}
                 dimmed={isolatedMemberId != null && isolatedMemberId !== member.id}
+                showName={showNames}
                 onSelect={onSelectPerson}
               />
             );

@@ -28,8 +28,12 @@ export function TabletLayout(props: LayoutProps) {
     onStepPrev,
     onStepNext,
     onScrub,
+    onJumpToPicture,
     showTrails,
     onToggleTrails,
+    showNames,
+    onToggleNames,
+    isAnimating,
     isolatedMemberId,
     onSelectPerson,
     members,
@@ -73,8 +77,11 @@ export function TabletLayout(props: LayoutProps) {
             onStepPrev={onStepPrev}
             onStepNext={onStepNext}
             onScrub={onScrub}
+            onJumpToPicture={onJumpToPicture}
             showTrails={showTrails}
             onToggleTrails={onToggleTrails}
+            showNames={showNames}
+            onToggleNames={onToggleNames}
           />
         </div>
         <div className={`${styles.glassPanel} ${styles.stageCell}`}>
@@ -86,7 +93,8 @@ export function TabletLayout(props: LayoutProps) {
             membersById={membersById}
             propsById={propsById}
             micsById={micsById}
-            showTrails={showTrails}
+            showTrails={showTrails || isAnimating}
+            showNames={showNames}
             isolatedMemberId={isolatedMemberId}
             onSelectPerson={onSelectPerson}
           />

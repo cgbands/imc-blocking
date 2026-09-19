@@ -29,8 +29,12 @@ export function PhoneLayout(props: LayoutProps) {
     onStepPrev,
     onStepNext,
     onScrub,
+    onJumpToPicture,
     showTrails,
     onToggleTrails,
+    showNames,
+    onToggleNames,
+    isAnimating,
     isolatedMemberId,
     onSelectPerson,
     members,
@@ -69,7 +73,8 @@ export function PhoneLayout(props: LayoutProps) {
           membersById={membersById}
           propsById={propsById}
           micsById={micsById}
-          showTrails={showTrails}
+          showTrails={showTrails || isAnimating}
+          showNames={showNames}
           isolatedMemberId={isolatedMemberId}
           onSelectPerson={onSelectPerson}
         />
@@ -89,8 +94,11 @@ export function PhoneLayout(props: LayoutProps) {
           onStepPrev={onStepPrev}
           onStepNext={onStepNext}
           onScrub={onScrub}
+          onJumpToPicture={onJumpToPicture}
           showTrails={showTrails}
           onToggleTrails={onToggleTrails}
+          showNames={showNames}
+          onToggleNames={onToggleNames}
           compact
         />
       </Sheet>

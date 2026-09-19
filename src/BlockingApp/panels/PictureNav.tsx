@@ -12,8 +12,11 @@ interface PictureNavProps {
   onStepPrev: () => void;
   onStepNext: () => void;
   onScrub: (value: number) => void;
+  onJumpToPicture: (index: number) => void;
   showTrails: boolean;
   onToggleTrails: (value: boolean) => void;
+  showNames: boolean;
+  onToggleNames: (value: boolean) => void;
   compact?: boolean;
 }
 
@@ -28,8 +31,11 @@ export function PictureNav({
   onStepPrev,
   onStepNext,
   onScrub,
+  onJumpToPicture,
   showTrails,
   onToggleTrails,
+  showNames,
+  onToggleNames,
   compact,
 }: PictureNavProps) {
   const current = pictures[currentIndex];
@@ -64,16 +70,25 @@ export function PictureNav({
 
       <div className={styles.currentLabel}>{current ? `${currentIndex + 1}. ${current.label}` : "—"}</div>
 
-      <label className={styles.trailsToggle}>
-        <input type="checkbox" checked={showTrails} onChange={(e) => onToggleTrails(e.target.checked)} />
-        Show path trails
-      </label>
+      <div className={styles.toggleRow}>
+        <label className={styles.trailsToggle}>
+          <input type="checkbox" checked={showTrails} onChange={(e) => onToggleTrails(e.target.checked)} />
+          Path trails
+        </label>
+        <label className={styles.trailsToggle}>
+          <input type="checkbox" checked={showNames} onChange={(e) => onToggleNames(e.target.checked)} />
+          Names
+        </label>
+      </div>
 
       {!compact && (
         <ul className={styles.pictureList}>
           {pictures.map((p, i) => (
             <li key={p.id}>
-              <button className={i === currentIndex ? styles.pictureActive : styles.pictureBtn} onClick={() => onScrub(i)}>
+              <button
+                className={i === currentIndex ? styles.pictureActive : styles.pictureBtn}
+                onClick={() => onJumpToPicture(i)}
+              >
                 {i + 1}. {p.label}
               </button>
             </li>

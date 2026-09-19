@@ -11,6 +11,7 @@ export interface LayoutProps {
   nextPicture: Picture | null;
   progress: number;
   isPlaying: boolean;
+  isAnimating: boolean;
   playerIndex: number;
   canStepPrev: boolean;
   canStepNext: boolean;
@@ -18,8 +19,11 @@ export interface LayoutProps {
   onStepPrev: () => void;
   onStepNext: () => void;
   onScrub: (value: number) => void;
+  onJumpToPicture: (index: number) => void;
   showTrails: boolean;
   onToggleTrails: (value: boolean) => void;
+  showNames: boolean;
+  onToggleNames: (value: boolean) => void;
 
   members: Member[];
   membersById: Map<string, Member>;
