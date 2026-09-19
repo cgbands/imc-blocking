@@ -1,6 +1,8 @@
 // Minimal app-shell cache so the prototype opens fast (and offline-ish) once installed.
 const CACHE_NAME = "imc-blocking-shell-v1";
-const SHELL_URLS = ["/", "/manifest.json", "/icon-192.png", "/icon-512.png"];
+// Relative to this script's own scope, so it works whether the app is
+// served from the domain root or a GitHub Pages /<repo-name>/ subpath.
+const SHELL_URLS = ["./", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL_URLS)));
