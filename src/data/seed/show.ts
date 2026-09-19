@@ -17,21 +17,38 @@ import {
   formationScatter,
   formationWedge,
 } from "./formations";
+import { buildRiserGrid } from "./riserGrid";
 import { mulberry32 } from "./rng";
 
+const STAGE_WIDTH = 72;
+const STAGE_HEIGHT = 42;
+
+// Default: 5 rows x 5 risers across, spread out to fill most of the stage.
+// The grid is data-driven (RiserGridConfig) so a later Stage Setup editor
+// can offer other configurations (e.g. 6 across) by regenerating `risers`
+// from a different config via buildRiserGrid().
+const RISER_GRID = {
+  rows: 5,
+  cols: 5,
+  riserWidth: 9,
+  riserHeight: 3.4,
+  gapX: 1.4,
+  gapY: 1.2,
+  originX: 0,
+  originY: 2,
+};
+RISER_GRID.originX = (STAGE_WIDTH - (RISER_GRID.cols * RISER_GRID.riserWidth + (RISER_GRID.cols - 1) * RISER_GRID.gapX)) / 2;
+
 const STAGE: StageConfig = {
-  width: 64,
-  height: 36,
+  width: STAGE_WIDTH,
+  height: STAGE_HEIGHT,
   gridSpacingFt: 2,
   snapToGrid: true,
-  risers: [
-    { id: "riser-1", x: 4, y: 1, width: 56, height: 3, stairEdges: ["front"] },
-    { id: "riser-2", x: 6, y: 5, width: 52, height: 3, stairEdges: ["front", "left"] },
-    { id: "riser-3", x: 8, y: 9, width: 48, height: 3, stairEdges: ["front", "right"] },
-  ],
+  riserGrid: RISER_GRID,
+  risers: buildRiserGrid(RISER_GRID),
   wings: [
-    { side: "left", x: -10, y: 0, width: 10, height: 36 },
-    { side: "right", x: 64, y: 0, width: 10, height: 36 },
+    { side: "left", x: -12, y: 0, width: 12, height: STAGE_HEIGHT },
+    { side: "right", x: STAGE_WIDTH, y: 0, width: 12, height: STAGE_HEIGHT },
   ],
 };
 

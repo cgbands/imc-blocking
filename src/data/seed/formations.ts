@@ -23,20 +23,27 @@ function splitWings(ids: string[], opts: FormationOptions | undefined) {
   };
 }
 
-/** Rows on the risers plus floor rows in front of them. */
+/** Rows on the risers (aligned to the actual riser grid) plus floor rows in front of them. */
 export function formationRiserRows(ids: string[], stage: StageConfig, opts?: FormationOptions): PersonPlacement[] {
   const { wingIds, mainIds } = splitWings(ids, opts);
-  const rows = [...stage.risers.map((r) => r.y + r.height / 2), stage.height - 6, stage.height - 2];
+
+  const riserRowYs = Array.from(new Set(stage.risers.map((r) => r.y + r.height / 2))).sort((a, b) => a - b);
+  const riserMinX = Math.min(...stage.risers.map((r) => r.x));
+  const riserMaxX = Math.max(...stage.risers.map((r) => r.x + r.width));
+
+  const rows = [
+    ...riserRowYs.map((y) => ({ y, minX: riserMinX + 0.6, maxX: riserMaxX - 0.6 })),
+    { y: stage.height - 6, minX: 4, maxX: stage.width - 4 },
+    { y: stage.height - 2, minX: 4, maxX: stage.width - 4 },
+  ];
   const perRow = Math.ceil(mainIds.length / rows.length);
   const placements: PersonPlacement[] = [];
   let cursor = 0;
-  rows.forEach((y, rowIndex) => {
+  rows.forEach(({ y, minX, maxX }) => {
     const rowIds = mainIds.slice(cursor, cursor + perRow);
     cursor += perRow;
-    const margin = 4 + rowIndex * 1.2;
-    const usableWidth = stage.width - margin * 2;
     rowIds.forEach((memberId, i) => {
-      const x = rowIds.length === 1 ? stage.width / 2 : margin + (usableWidth * i) / (rowIds.length - 1);
+      const x = rowIds.length === 1 ? (minX + maxX) / 2 : minX + ((maxX - minX) * i) / (rowIds.length - 1);
       placements.push({ memberId, x, y, zone: "stage" });
     });
   });

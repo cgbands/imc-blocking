@@ -95,11 +95,30 @@ export interface WingZone {
   height: number;
 }
 
+/**
+ * Describes a grid of individual riser blocks (rows x cols). `risers` on
+ * StageConfig is the generated, renderable Riser[]; this is the editable
+ * source config a future Stage Setup editor (Phase 3) would expose as
+ * number inputs and use to regenerate `risers`.
+ */
+export interface RiserGridConfig {
+  rows: number;
+  cols: number;
+  riserWidth: number;
+  riserHeight: number;
+  gapX: number;
+  gapY: number;
+  /** top-left of the grid's first (furthest upstage) row */
+  originX: number;
+  originY: number;
+}
+
 export interface StageConfig {
   width: number;
   height: number;
   gridSpacingFt: 0 | 1 | 2 | 5;
   snapToGrid: boolean;
+  riserGrid: RiserGridConfig;
   risers: Riser[];
   wings: WingZone[];
 }

@@ -25,17 +25,23 @@
   gap: 0.35rem;
 }
 
-.songList li {
-  padding: 0.6rem 0.75rem;
+.songBtn,
+.songActive {
+  width: 100%;
+  text-align: left;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
   border-radius: var(--radius-sm);
+  border: none;
   background: var(--surface-2);
   color: var(--text);
   font-size: 0.95rem;
+  cursor: pointer;
 }
 
 .songActive {
-  background: var(--accent-soft) !important;
-  color: var(--accent-strong) !important;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
   font-weight: 600;
 }
 
@@ -48,6 +54,103 @@
   margin-top: auto;
   font-size: 0.75rem;
   color: var(--text-muted);
+}
+
+/* Picture nav / transport */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem;
+  border-top: 1px solid var(--surface-border);
+}
+
+.nav[data-compact] {
+  padding: 0.5rem 1rem 1rem;
+  border-top: none;
+}
+
+.transport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.stepBtn,
+.playBtn {
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-2);
+  color: var(--accent-strong);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.stepBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.playBtn {
+  min-width: 56px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-size: 0.95rem;
+}
+
+.scrubber {
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--accent);
+}
+
+.currentLabel {
+  font-size: 0.85rem;
+  color: var(--text);
+  text-align: center;
+}
+
+.trailsToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  min-height: 32px;
+}
+
+.pictureList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  overflow: auto;
+}
+
+.pictureBtn,
+.pictureActive {
+  width: 100%;
+  text-align: left;
+  min-height: 40px;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.pictureActive {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 600;
 }
 
 .devControls {

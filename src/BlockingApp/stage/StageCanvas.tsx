@@ -1,13 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import type { Member, Picture, StageConfig } from "../../types";
+import type { Member, Mic, Picture, Prop, StageConfig } from "../../types";
 import { Person } from "./Person";
+import { PropNode, MicNode } from "./PropAndMic";
+import { interpolateMics, interpolatePeople, interpolateProps } from "./interpolate";
 import styles from "./StageCanvas.module.css";
 
 interface StageCanvasProps {
   stageConfig: StageConfig;
   picture: Picture | undefined;
+  nextPicture?: Picture | null;
+  progress?: number;
   membersById: Map<string, Member>;
+  propsById: Map<string, Prop>;
+  micsById: Map<string, Mic>;
   highlightedMemberId?: string | null;
+  isolatedMemberId?: string | null;
+  showTrails?: boolean;
   onSelectPerson?: (memberId: string) => void;
 }
 
@@ -15,7 +23,19 @@ const MIN_SCALE = 0.6;
 const MAX_SCALE = 8;
 const DENSE_LABEL_THRESHOLD_PX_PER_FT = 22;
 
-export function StageCanvas({ stageConfig, picture, membersById, highlightedMemberId, onSelectPerson }: StageCanvasProps) {
+export function StageCanvas({
+  stageConfig,
+  picture,
+  nextPicture = null,
+  progress = 0,
+  membersById,
+  propsById,
+  micsById,
+  highlightedMemberId,
+  isolatedMemberId,
+  showTrails,
+  onSelectPerson,
+}: StageCanvasProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
@@ -159,8 +179,11 @@ export function StageCanvas({ stageConfig, picture, membersById, highlightedMemb
     }
   };
 
-  const people = picture?.people.filter((p) => p.zone === "stage") ?? [];
-  const wingPeople = picture?.people.filter((p) => p.zone !== "stage") ?? [];
+  const people = useMemo(() => interpolatePeople(picture, nextPicture, progress), [picture, nextPicture, progress]);
+  const propPlacements = useMemo(() => interpolateProps(picture, nextPicture, progress), [picture, nextPicture, progress]);
+  const micPlacements = useMemo(() => interpolateMics(picture, nextPicture, progress), [picture, nextPicture, progress]);
+
+  const nextPeopleById = useMemo(() => new Map((nextPicture?.people ?? []).map((p) => [p.memberId, p])), [nextPicture]);
 
   return (
     <div ref={wrapperRef} className={styles.wrapper}>
@@ -184,8 +207,42 @@ export function StageCanvas({ stageConfig, picture, membersById, highlightedMemb
           ))}
         </g>
 
+        {showTrails && picture && nextPicture && (
+          <g className={styles.trails}>
+            {picture.people
+              .filter((p) => !isolatedMemberId || p.memberId === isolatedMemberId)
+              .map((pa) => {
+                const pb = nextPeopleById.get(pa.memberId);
+                if (!pb) return null;
+                const member = membersById.get(pa.memberId);
+                const isolated = isolatedMemberId === pa.memberId;
+                return (
+                  <line
+                    key={pa.memberId}
+                    x1={pa.x}
+                    y1={pa.y}
+                    x2={pb.x}
+                    y2={pb.y}
+                    stroke={member?.color ?? "#888"}
+                    strokeWidth={isolated ? 0.2 : 0.08}
+                    opacity={isolated ? 0.9 : 0.35}
+                    strokeLinecap="round"
+                  />
+                );
+              })}
+          </g>
+        )}
+
         <g>
-          {[...people, ...wingPeople].map((placement) => {
+          {propPlacements.map((placement) => {
+            const prop = propsById.get(placement.propId);
+            if (!prop) return null;
+            return <PropNode key={prop.id} prop={prop} x={placement.x} y={placement.y} />;
+          })}
+        </g>
+
+        <g>
+          {people.map((placement) => {
             const member = membersById.get(placement.memberId);
             if (!member) return null;
             return (
@@ -195,9 +252,18 @@ export function StageCanvas({ stageConfig, picture, membersById, highlightedMemb
                 x={placement.x}
                 y={placement.y}
                 highlighted={highlightedMemberId === member.id}
+                dimmed={isolatedMemberId != null && isolatedMemberId !== member.id}
                 onSelect={onSelectPerson}
               />
             );
+          })}
+        </g>
+
+        <g>
+          {micPlacements.map((placement) => {
+            const mic = micsById.get(placement.micId);
+            if (!mic) return null;
+            return <MicNode key={mic.id} mic={mic} x={placement.x} y={placement.y} />;
           })}
         </g>
       </svg>

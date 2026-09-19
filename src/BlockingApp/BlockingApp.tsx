@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import type { DataService } from "../data/DataService";
 import { MockDataService } from "../data/MockDataService";
-import type { Member, Picture, Song, StageConfig } from "../types";
+import type { Member, Mic, Picture, Prop, Song, StageConfig } from "../types";
 import { useViewport } from "./layout/useViewport";
+import { useTransitionPlayer } from "./stage/useTransitionPlayer";
 import { PhoneLayout } from "./layout/PhoneLayout";
 import { TabletLayout } from "./layout/TabletLayout";
 import { DesktopLayout } from "./layout/DesktopLayout";
@@ -18,31 +19,41 @@ interface ShowState {
   members: Member[];
   songs: Song[];
   pictures: Picture[];
+  props: Prop[];
+  mics: Mic[];
   stageConfig: StageConfig;
 }
 
-export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initialCanEdit = false, dataService }: BlockingAppProps) {
+const CAN_EDIT_STORAGE_KEY = "imc-blocking:can-edit";
+
+export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initialCanEdit, dataService }: BlockingAppProps) {
   const service = useMemo(() => dataService ?? new MockDataService(), [dataService]);
   const [show, setShow] = useState<ShowState | null>(null);
   const [currentMemberId, setCurrentMemberId] = useState(initialMemberId ?? "");
-  const [canEdit, setCanEdit] = useState(initialCanEdit);
+  const [canEdit, setCanEdit] = useState(() => {
+    if (initialCanEdit) return true;
+    try {
+      return localStorage.getItem(CAN_EDIT_STORAGE_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
   const [currentSongId, setCurrentSongId] = useState<string | null>(null);
-  const [currentPictureId, setCurrentPictureId] = useState<string | null>(null);
+  const [showTrails, setShowTrails] = useState(false);
+  const [isolatedMemberId, setIsolatedMemberId] = useState<string | null>(null);
 
   const loadAll = async () => {
-    const [members, songs, stageConfig] = await Promise.all([
+    const [members, songs, stageConfig, props, mics] = await Promise.all([
       service.getMembers(),
       service.getSetlist(),
       service.getStageConfig(),
+      service.getProps(),
+      service.getMics(),
     ]);
     const allPictures = (await Promise.all(songs.map((s) => service.getPictures(s.id)))).flat();
-    setShow({ members, songs, pictures: allPictures, stageConfig });
+    setShow({ members, songs, pictures: allPictures, props, mics, stageConfig });
     if (!currentMemberId && members.length) setCurrentMemberId(members[0].id);
-    if (!currentSongId && songs.length) {
-      setCurrentSongId(songs[0].id);
-      const first = allPictures.find((p) => p.songId === songs[0].id);
-      if (first) setCurrentPictureId(first.id);
-    }
+    setCurrentSongId((prev) => prev ?? (songs[0]?.id ?? null));
   };
 
   useEffect(() => {
@@ -54,10 +65,38 @@ export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initial
   const viewport = useViewport();
 
   const membersById = useMemo(() => new Map((show?.members ?? []).map((m) => [m.id, m])), [show]);
-  const currentPicture = show?.pictures.find((p) => p.id === currentPictureId);
+  const propsById = useMemo(() => new Map((show?.props ?? []).map((p) => [p.id, p])), [show]);
+  const micsById = useMemo(() => new Map((show?.mics ?? []).map((m) => [m.id, m])), [show]);
+
+  const songPictures = useMemo(
+    () => (show?.pictures ?? []).filter((p) => p.songId === currentSongId).sort((a, b) => a.order - b.order),
+    [show, currentSongId],
+  );
+
+  const player = useTransitionPlayer(songPictures.length, currentSongId ?? "");
+  const currentPicture = songPictures[player.index];
+  const nextPicture = songPictures[player.index + 1] ?? null;
+
+  const handleSelectSong = (songId: string) => {
+    setCurrentSongId(songId);
+    setIsolatedMemberId(null);
+  };
+
+  const handleSelectPerson = (memberId: string) => {
+    setIsolatedMemberId((prev) => (prev === memberId ? null : memberId));
+  };
 
   const handleResetSeed = async () => {
     await service.resetSeed();
+  };
+
+  const persistCanEdit = (value: boolean) => {
+    setCanEdit(value);
+    try {
+      localStorage.setItem(CAN_EDIT_STORAGE_KEY, String(value));
+    } catch {
+      // localStorage unavailable (private mode, etc.) — role just won't persist
+    }
   };
 
   if (!show) {
@@ -68,14 +107,37 @@ export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initial
     stageConfig: show.stageConfig,
     songs: show.songs,
     currentSongId,
+    onSelectSong: handleSelectSong,
+
+    songPictures,
     currentPicture,
+    nextPicture,
+    progress: player.progress,
+    isPlaying: player.isPlaying,
+    playerIndex: player.index,
+    canStepPrev: player.canStepPrev,
+    canStepNext: player.canStepNext,
+    onPlayPause: player.isPlaying ? player.pause : player.play,
+    onStepPrev: player.stepPrev,
+    onStepNext: player.stepNext,
+    onScrub: player.scrubTo,
+    showTrails,
+    onToggleTrails: setShowTrails,
+
     members: show.members,
     membersById,
+    propsById,
+    micsById,
+    isolatedMemberId,
+    onSelectPerson: handleSelectPerson,
+
     currentMemberId,
     canEdit,
     onChangeMember: setCurrentMemberId,
-    onToggleRole: setCanEdit,
+    onToggleRole: persistCanEdit,
     onResetSeed: handleResetSeed,
+    onEditorLogin: () => persistCanEdit(true),
+    onEditorLogout: () => persistCanEdit(false),
   };
 
   return (

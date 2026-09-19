@@ -86,6 +86,24 @@
   min-width: 0;
 }
 
+.setlistCell {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.setlistCell > :first-child {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.setlistCell > :last-child {
+  flex: 0 0 auto;
+  max-height: 55%;
+  overflow: auto;
+}
+
 .inspectorPlaceholder {
   padding: 1rem;
   color: var(--text-muted);
