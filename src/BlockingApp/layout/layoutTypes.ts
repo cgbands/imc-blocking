@@ -1,4 +1,5 @@
-import type { Member, Mic, Picture, Prop, Song, StageConfig } from "../../types";
+import type { Member, Mic, Picture, Prop, PropKind, Song, StageConfig } from "../../types";
+import type { SelectionState } from "../editor/useEditor";
 
 export interface LayoutProps {
   stageConfig: StageConfig;
@@ -39,4 +40,30 @@ export interface LayoutProps {
   onResetSeed: () => void;
   onEditorLogin: () => void;
   onEditorLogout: () => void;
+
+  /** Editing */
+  coarsePointer: boolean;
+  selection: SelectionState;
+  selectionCount: number;
+  onSelectionChange: (selection: SelectionState) => void;
+  onMovePeople: (moves: { memberId: string; x: number; y: number }[]) => void;
+  onMoveProps: (moves: { propId: string; x: number; y: number }[]) => void;
+  snapValue: (v: number) => number;
+  canUndo: boolean;
+  canRedo: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
+  onAddProp: (kind: PropKind) => void;
+  onUpdateProp: (prop: Prop) => void;
+  onDeleteProp: (propId: string) => void;
+  onUpdateMember: (member: Member) => void;
+  onAlign: (mode: "left" | "right" | "top" | "bottom" | "centerX" | "centerY") => void;
+  onDistribute: (axis: "x" | "y") => void;
+  onDeleteSelection: () => void;
+  onDuplicatePicture: (index: number) => void;
+  onDeletePicture: (index: number) => void;
+  onMovePicture: (index: number, delta: number) => void;
+  onMoveSong: (index: number, delta: number) => void;
+  onUpdateStageConfig: (config: StageConfig) => void;
+  onShowHelp: () => void;
 }

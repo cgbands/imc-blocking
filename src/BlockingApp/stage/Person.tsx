@@ -52,8 +52,9 @@ interface PersonProps {
   y: number;
   highlighted?: boolean;
   dimmed?: boolean;
-  showName?: boolean;
-  onSelect?: (memberId: string) => void;
+  selected?: boolean;
+  /** Always label this person, whatever the names toggle says (selection, Find Me). */
+  forceName?: boolean;
 }
 
 /** "James A." -> "James" — used when zoomed out, where full names collide. */
@@ -61,38 +62,32 @@ function shortName(name: string): string {
   return name.split(" ")[0];
 }
 
-export const Person = memo(function Person({ member, x, y, highlighted, dimmed, showName, onSelect }: PersonProps) {
+export const Person = memo(function Person({ member, x, y, highlighted, dimmed, selected, forceName }: PersonProps) {
   return (
-    <g
-      transform={`translate(${x}, ${y})`}
-      opacity={dimmed ? 0.25 : 1}
-      onPointerDown={(e) => {
-        e.stopPropagation();
-        onSelect?.(member.id);
-      }}
-      style={{ cursor: onSelect ? "pointer" : "default" }}
-    >
+    <g data-member-id={member.id} transform={`translate(${x}, ${y})`} opacity={dimmed ? 0.25 : 1}>
       {/* transparent hit target, larger than the visual icon for touch */}
       <circle r={SHAPE_SIZE * 0.85} fill="transparent" />
+      {selected && <circle r={SHAPE_SIZE * 0.85} className="selectionRing" />}
       {highlighted && <circle r={SHAPE_SIZE * 0.95} fill="none" stroke="#ffcf4d" strokeWidth={0.18} className="findMePulse" />}
       <PersonIcon shape={member.shape} color={member.color} />
       <g transform={`translate(${SHAPE_SIZE * 0.32}, ${-SHAPE_SIZE * 0.32})`}>
         <PersonIcon shape={member.tagShape} color={member.tagColor} size={SHAPE_SIZE * 0.45} />
       </g>
-      {showName && (
-        // Labels alternate between two tiers by x position so neighbours in a
-        // packed riser row don't overprint each other.
-        <g className={Math.round(x / 1.2) % 2 === 0 ? "personLabelTierA" : "personLabelTierB"}>
-          {/* Two variants; CSS picks one by zoom level so changing zoom
-              never has to re-render 106 people. */}
-          <text className="personLabel personLabelShort" textAnchor="middle">
-            {shortName(member.name)}
-          </text>
-          <text className="personLabel personLabelFull" textAnchor="middle">
-            {member.name}
-          </text>
-        </g>
-      )}
+      {/* Labels alternate between two tiers by x position so neighbours in a
+          packed riser row don't overprint each other. Which labels are visible
+          (and short vs full) is decided entirely in CSS from the zoom level and
+          the names toggle, so neither zooming nor toggling re-renders 106 people. */}
+      <g
+        className={Math.round(x / 1.2) % 2 === 0 ? "personLabelTierA" : "personLabelTierB"}
+        data-force-label={forceName || undefined}
+      >
+        <text className="personLabel personLabelShort" textAnchor="middle">
+          {shortName(member.name)}
+        </text>
+        <text className="personLabel personLabelFull" textAnchor="middle">
+          {member.name}
+        </text>
+      </g>
     </g>
   );
 });

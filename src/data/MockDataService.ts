@@ -66,8 +66,36 @@ export class MockDataService implements DataService {
     this.notify();
   }
 
+  async saveSongPictures(songId: string, pictures: Picture[]): Promise<void> {
+    const others = this.data.pictures.filter((p) => p.songId !== songId);
+    this.data.pictures = [...others, ...pictures.map((p, i) => ({ ...p, order: i }))];
+    const song = this.data.songs.find((s) => s.id === songId);
+    if (song) song.pictureIds = pictures.map((p) => p.id);
+    save(this.data);
+    this.notify();
+  }
+
   async saveStageConfig(config: StageConfig): Promise<void> {
     this.data.stageConfig = config;
+    save(this.data);
+    this.notify();
+  }
+
+  async saveMember(member: Member): Promise<void> {
+    const idx = this.data.members.findIndex((m) => m.id === member.id);
+    if (idx >= 0) this.data.members[idx] = member;
+    save(this.data);
+    this.notify();
+  }
+
+  async saveProps(props: Prop[]): Promise<void> {
+    this.data.props = props;
+    save(this.data);
+    this.notify();
+  }
+
+  async saveSetlist(songs: Song[]): Promise<void> {
+    this.data.songs = songs.map((s, i) => ({ ...s, order: i }));
     save(this.data);
     this.notify();
   }

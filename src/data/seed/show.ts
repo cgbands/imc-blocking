@@ -17,8 +17,9 @@ import {
   formationScatter,
   formationWedge,
 } from "./formations";
-import { buildRiserGrid } from "./riserGrid";
+import { buildRiserGrid, centeredOriginX } from "./riserGrid";
 import { mulberry32 } from "./rng";
+import type { RiserGridConfig } from "../../types";
 
 const STAGE_WIDTH = 72;
 const STAGE_HEIGHT = 42;
@@ -27,7 +28,7 @@ const STAGE_HEIGHT = 42;
 // The grid is data-driven (RiserGridConfig) so a later Stage Setup editor
 // can offer other configurations (e.g. 6 across) by regenerating `risers`
 // from a different config via buildRiserGrid().
-const RISER_GRID = {
+const RISER_GRID: RiserGridConfig = {
   rows: 5,
   cols: 5,
   riserWidth: 9,
@@ -36,8 +37,9 @@ const RISER_GRID = {
   gapY: 1.2,
   originX: 0,
   originY: 2,
+  stairs: { front: true, back: false, left: true, right: true },
 };
-RISER_GRID.originX = (STAGE_WIDTH - (RISER_GRID.cols * RISER_GRID.riserWidth + (RISER_GRID.cols - 1) * RISER_GRID.gapX)) / 2;
+RISER_GRID.originX = centeredOriginX(RISER_GRID, STAGE_WIDTH);
 
 const STAGE: StageConfig = {
   width: STAGE_WIDTH,

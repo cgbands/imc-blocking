@@ -5,10 +5,11 @@ today; built so it can later mount as `<BlockingApp />` inside the member portal
 Airtable as the data source (see [`docs/AIRTABLE.md`](docs/AIRTABLE.md), coming in a
 later phase).
 
-**Status: Phase 2 of 6** — responsive glass/bento shell, 106-person seeded stage,
-pinch/pan/wheel zoom, PWA basics, plus setlist/Picture navigation with play/pause,
-scrubbing, and animated transitions (with path trails) between Pictures. Editing,
-mic handoff, and Find Me still land in later phases.
+**Status: Phase 3 of 6** — responsive glass/bento shell, 106-person seeded stage,
+pinch/pan/wheel zoom, PWA basics, setlist/Picture navigation with play/pause,
+scrubbing and animated transitions, and a full editor (drag, multi-select,
+align/distribute, props, stage/riser setup, undo/redo, keyboard shortcuts).
+Mic handoff and Find Me land in Phases 4 and 5.
 
 ## Run it
 
@@ -60,6 +61,30 @@ which is scaffolding for testing (switching identities, resetting seed data) and
 built to be trivial to delete later. Neither is real auth — per the project's
 non-goals, there's no server-side check yet; `canEdit` is a prop so it's clear where
 that check will go once this mounts in the real portal.
+
+## Editing
+
+Log in as an editor and you get a toolbar above the stage plus an Inspector panel:
+
+- **Move people**: drag them. Drag on empty stage to marquee-select a group;
+  Shift/Cmd-click to add or remove one. Arrow keys nudge (Shift = further).
+- **Align / distribute**: select 2+ (3+ to distribute) and use the toolbar.
+- **Props**: add a rectangle, square, or circle, drag to place it, and use the
+  Inspector to rename, recolour, resize, or delete it. A new prop is placed in
+  every Picture of the current song, then positioned per Picture.
+- **People styling**: shape, colour, and tag belong to the *person*, so changing
+  them in the Inspector applies across every Picture.
+- **Pictures**: reorder, duplicate, or delete from the Pictures list; songs
+  reorder from the Setlist.
+- **Stage setup**: stage size, riser rows/columns/size/gaps, which perimeter
+  edges have stairs, grid spacing (off / 1 / 2 / 5 ft) and snap-to-grid.
+- **Undo/redo**: Cmd/Ctrl+Z and Cmd/Ctrl+Shift+Z. Press `?` for the full
+  shortcut list.
+
+Every edit funnels through `apply()` in `src/BlockingApp/editor/useEditor.ts`,
+which calls the `DataService`. `canEdit` is a UI guard only — the server-side
+role check belongs behind those `DataService` calls once this talks to a real
+backend.
 
 ## Stage / risers
 

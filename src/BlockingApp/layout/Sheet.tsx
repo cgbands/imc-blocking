@@ -2,10 +2,11 @@ import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import styles from "./Sheet.module.css";
 
-type SheetState = "peek" | "half" | "full";
+export type SheetState = "peek" | "half" | "full";
 
 interface SheetProps {
   children: ReactNode;
+  onStateChange?: (state: SheetState) => void;
 }
 
 const HEIGHTS: Record<SheetState, string> = {
@@ -16,9 +17,14 @@ const HEIGHTS: Record<SheetState, string> = {
 
 const ORDER: SheetState[] = ["peek", "half", "full"];
 
-export function Sheet({ children }: SheetProps) {
-  const [state, setState] = useState<SheetState>("half");
+export function Sheet({ children, onStateChange }: SheetProps) {
+  const [state, setStateRaw] = useState<SheetState>("half");
   const dragStart = useRef<{ y: number; state: SheetState } | null>(null);
+
+  const setState = (next: SheetState) => {
+    setStateRaw(next);
+    onStateChange?.(next);
+  };
 
   const cycle = () => {
     const idx = ORDER.indexOf(state);

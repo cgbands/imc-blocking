@@ -1,0 +1,331 @@
+/* --- Toolbar --- */
+.toolbar,
+.toolbarFloating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  background: var(--surface-glass);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--surface-border);
+}
+
+.toolbar[data-scrollable],
+.toolbarFloating[data-scrollable] {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  justify-content: flex-start;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--surface-border);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.toolbar[data-scrollable] .toolGroup {
+  flex: 0 0 auto;
+}
+
+.toolbarFloating {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 20;
+  box-shadow: 0 8px 24px rgba(20, 60, 100, 0.2);
+  max-width: calc(100% - 2rem);
+  justify-content: center;
+}
+
+.toolGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-right: 0.5rem;
+  border-right: 1px solid var(--surface-border);
+}
+
+.toolGroup:last-of-type {
+  border-right: none;
+  padding-right: 0;
+}
+
+.toolBtn {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-2);
+  color: var(--accent-strong);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.toolBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.selectionCount {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* --- Inspector --- */
+.inspector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem;
+  min-height: 0;
+  overflow: auto;
+}
+
+.inspectorTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-strong);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.inspectorHint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.inspectorBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.inspectorName {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.inspectorMeta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* --- Shared form bits --- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  flex: 1;
+}
+
+.fieldRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.field input,
+.field select {
+  min-height: 44px;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--surface-border);
+  padding: 0 0.5rem;
+  background: var(--surface-1);
+  color: var(--text);
+}
+
+.checkRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.checkItem {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  min-height: 32px;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+
+.chip,
+.chipActive {
+  min-height: 36px;
+  padding: 0 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.chipActive {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 600;
+  border-color: transparent;
+}
+
+.swatchRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.swatch,
+.swatchActive {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.swatchActive {
+  border-color: var(--text-strong);
+  box-shadow: 0 0 0 2px var(--surface-1) inset;
+}
+
+.dangerBtn {
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(176, 64, 95, 0.4);
+  background: rgba(176, 64, 95, 0.08);
+  color: #b0405f;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* --- Stage setup --- */
+.setup {
+  border-top: 1px solid var(--surface-border);
+  padding: 0.75rem 1rem 1rem;
+}
+
+.setupToggle {
+  width: 100%;
+  text-align: left;
+  min-height: 44px;
+  border: none;
+  background: transparent;
+  color: var(--text-strong);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.setupBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-top: 0.4rem;
+}
+
+.setupHeading {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* --- Shortcut sheet --- */
+.sheetBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 40, 60, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+  padding: 1rem;
+}
+
+.shortcutSheet {
+  background: var(--surface-1);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--surface-border);
+  padding: 1.25rem;
+  max-width: 460px;
+  width: 100%;
+  max-height: 80%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 20px 50px rgba(20, 50, 90, 0.25);
+}
+
+.shortcutList {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.shortcutRow {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  font-size: 0.85rem;
+}
+
+.shortcutRow dt {
+  flex: 0 0 42%;
+}
+
+.shortcutRow dd {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.shortcutRow kbd {
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  background: var(--surface-2);
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  padding: 0.15rem 0.4rem;
+  color: var(--text-strong);
+}
+
+/* --- Picture row editing controls --- */
+.pictureRow {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.rowBtn {
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.rowBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}

@@ -29,6 +29,17 @@
   flex: 1;
   min-height: 0;
   padding: 0;
+  transition: padding-bottom 220ms ease;
+}
+
+/* Keep the stage centred in the area the sheet isn't covering. */
+.phoneStage[data-sheet="peek"] {
+  padding-bottom: 10%;
+}
+
+.phoneStage[data-sheet="half"],
+.phoneStage[data-sheet="full"] {
+  padding-bottom: 42%;
 }
 
 /* Tablet / Desktop bento shell */
@@ -84,6 +95,34 @@
 
 .stageCell {
   min-width: 0;
+  position: relative;
+}
+
+.helpBtn {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-glass);
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.floatingInspector {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: min(260px, 60%);
+  max-height: 60%;
+  overflow: auto;
+  background: var(--surface-glass);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 28px rgba(20, 60, 100, 0.18);
+  z-index: 20;
 }
 
 .setlistCell {

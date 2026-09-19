@@ -2,9 +2,13 @@ import { StageCanvas } from "../stage/StageCanvas";
 import { SetlistPanel } from "../panels/SetlistPanel";
 import { PictureNav } from "../panels/PictureNav";
 import { DevControls } from "../panels/DevControls";
+import { Inspector } from "../panels/Inspector";
+import { EditorToolbar } from "../panels/EditorToolbar";
+import { StageSetupPanel } from "../panels/StageSetupPanel";
 import { FindMeButton } from "../findme/FindMeButton";
 import { EditorLogin } from "../auth/EditorLogin";
-import { Sheet } from "./Sheet";
+import { useState } from "react";
+import { Sheet, type SheetState } from "./Sheet";
 import type { LayoutProps } from "./layoutTypes";
 import styles from "./layouts.module.css";
 
@@ -23,6 +27,7 @@ export function PhoneLayout(props: LayoutProps) {
     songPictures,
     playerIndex,
     isPlaying,
+    isAnimating,
     canStepPrev,
     canStepNext,
     onPlayPause,
@@ -34,7 +39,6 @@ export function PhoneLayout(props: LayoutProps) {
     onToggleTrails,
     showNames,
     onToggleNames,
-    isAnimating,
     isolatedMemberId,
     onSelectPerson,
     members,
@@ -45,7 +49,35 @@ export function PhoneLayout(props: LayoutProps) {
     onResetSeed,
     onEditorLogin,
     onEditorLogout,
+    coarsePointer,
+    selection,
+    selectionCount,
+    onSelectionChange,
+    onMovePeople,
+    onMoveProps,
+    snapValue,
+    canUndo,
+    canRedo,
+    onUndo,
+    onRedo,
+    onAddProp,
+    onUpdateProp,
+    onDeleteProp,
+    onUpdateMember,
+    onAlign,
+    onDistribute,
+    onDeleteSelection,
+    onDuplicatePicture,
+    onDeletePicture,
+    onMovePicture,
+    onMoveSong,
+    onUpdateStageConfig,
   } = props;
+
+  const hasSelection = selectionCount > 0;
+  // The sheet overlays the stage, so the stage reserves room for it and keeps
+  // the formation centred in what's actually visible.
+  const [sheetState, setSheetState] = useState<SheetState>("half");
 
   return (
     <div className={styles.phoneRoot}>
@@ -64,7 +96,7 @@ export function PhoneLayout(props: LayoutProps) {
         </div>
       </div>
 
-      <div className={styles.phoneStage}>
+      <div className={styles.phoneStage} data-sheet={sheetState}>
         <StageCanvas
           stageConfig={stageConfig}
           picture={currentPicture}
@@ -77,12 +109,54 @@ export function PhoneLayout(props: LayoutProps) {
           showNames={showNames}
           isolatedMemberId={isolatedMemberId}
           onSelectPerson={onSelectPerson}
+          editMode={canEdit}
+          coarsePointer={coarsePointer}
+          selection={selection}
+          onSelectionChange={onSelectionChange}
+          onMovePeople={onMovePeople}
+          onMoveProps={onMoveProps}
+          snapValue={snapValue}
         />
-        <FindMeButton floating />
+        {!canEdit && <FindMeButton floating />}
       </div>
 
-      <Sheet>
-        <SetlistPanel songs={songs} currentSongId={currentSongId} onSelectSong={onSelectSong} compact />
+      <Sheet onStateChange={setSheetState}>
+        {/* On a phone the editor tools live in the sheet rather than floating
+            over the stage, where they would collide with it. */}
+        {canEdit && (
+          <EditorToolbar
+            scrollable
+            canUndo={canUndo}
+            canRedo={canRedo}
+            selectionCount={selectionCount}
+            onUndo={onUndo}
+            onRedo={onRedo}
+            onAddProp={onAddProp}
+            onDuplicatePicture={() => onDuplicatePicture(playerIndex)}
+            onAlign={onAlign}
+            onDistribute={onDistribute}
+            onDelete={onDeleteSelection}
+          />
+        )}
+        {canEdit && hasSelection && (
+          <Inspector
+            selection={selection}
+            membersById={membersById}
+            propsById={propsById}
+            canEdit={canEdit}
+            onUpdateMember={onUpdateMember}
+            onUpdateProp={onUpdateProp}
+            onDeleteProp={onDeleteProp}
+          />
+        )}
+        <SetlistPanel
+          songs={songs}
+          currentSongId={currentSongId}
+          onSelectSong={onSelectSong}
+          compact
+          canEdit={canEdit}
+          onMoveSong={onMoveSong}
+        />
         <PictureNav
           pictures={songPictures}
           currentIndex={playerIndex}
@@ -100,7 +174,12 @@ export function PhoneLayout(props: LayoutProps) {
           showNames={showNames}
           onToggleNames={onToggleNames}
           compact
+          canEdit={canEdit}
+          onMovePicture={onMovePicture}
+          onDuplicatePicture={onDuplicatePicture}
+          onDeletePicture={onDeletePicture}
         />
+        {canEdit && <StageSetupPanel stageConfig={stageConfig} onChange={onUpdateStageConfig} />}
       </Sheet>
     </div>
   );

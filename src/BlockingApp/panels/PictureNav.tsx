@@ -1,5 +1,6 @@
 import type { Picture } from "../../types";
 import styles from "./panels.module.css";
+import editorStyles from "./editor.module.css";
 
 interface PictureNavProps {
   pictures: Picture[];
@@ -18,6 +19,10 @@ interface PictureNavProps {
   showNames: boolean;
   onToggleNames: (value: boolean) => void;
   compact?: boolean;
+  canEdit?: boolean;
+  onMovePicture?: (index: number, delta: number) => void;
+  onDuplicatePicture?: (index: number) => void;
+  onDeletePicture?: (index: number) => void;
 }
 
 export function PictureNav({
@@ -37,6 +42,10 @@ export function PictureNav({
   showNames,
   onToggleNames,
   compact,
+  canEdit,
+  onMovePicture,
+  onDuplicatePicture,
+  onDeletePicture,
 }: PictureNavProps) {
   const current = pictures[currentIndex];
   const max = Math.max(pictures.length - 1, 0);
@@ -84,13 +93,44 @@ export function PictureNav({
       {!compact && (
         <ul className={styles.pictureList}>
           {pictures.map((p, i) => (
-            <li key={p.id}>
+            <li key={p.id} className={editorStyles.pictureRow}>
               <button
                 className={i === currentIndex ? styles.pictureActive : styles.pictureBtn}
                 onClick={() => onJumpToPicture(i)}
               >
                 {i + 1}. {p.label}
               </button>
+              {canEdit && (
+                <>
+                  <button
+                    className={editorStyles.rowBtn}
+                    onClick={() => onMovePicture?.(i, -1)}
+                    disabled={i === 0}
+                    title="Move earlier"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    className={editorStyles.rowBtn}
+                    onClick={() => onMovePicture?.(i, 1)}
+                    disabled={i === pictures.length - 1}
+                    title="Move later"
+                  >
+                    ↓
+                  </button>
+                  <button className={editorStyles.rowBtn} onClick={() => onDuplicatePicture?.(i)} title="Duplicate">
+                    ⧉
+                  </button>
+                  <button
+                    className={editorStyles.rowBtn}
+                    onClick={() => onDeletePicture?.(i)}
+                    disabled={pictures.length <= 1}
+                    title="Delete Picture"
+                  >
+                    ✕
+                  </button>
+                </>
+              )}
             </li>
           ))}
         </ul>

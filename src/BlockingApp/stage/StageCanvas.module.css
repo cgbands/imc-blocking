@@ -35,6 +35,40 @@
   stroke-width: 0.08;
 }
 
+.gridLines line {
+  stroke: var(--stage-grid);
+  stroke-width: var(--hairline, 0.05px);
+}
+
+.stairs line {
+  stroke: var(--stage-riser-edge);
+  stroke-width: 0.12;
+  stroke-linecap: round;
+}
+
+.marquee {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: var(--hairline, 0.06px);
+  stroke-dasharray: 0.6 0.4;
+  pointer-events: none;
+}
+
+.wrapper :global(.selectionRing) {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 0.16;
+}
+
+.wrapper[data-edit] :global([data-member-id]),
+.wrapper[data-edit] :global([data-prop-id]) {
+  cursor: grab;
+}
+
+.wrapper[data-edit] .svg {
+  cursor: crosshair;
+}
+
 /* Labels are counter-scaled against the current zoom (via --label-font-size,
    updated on the wrapper whenever the viewBox changes) so they stay at a
    readable on-screen size no matter how far in or out you are. */
@@ -68,6 +102,24 @@
 }
 
 .wrapper.denseZoom :global(.personLabelShort) {
+  display: none;
+}
+
+/* Names off (the phone default): labels stay hidden until you zoom in past
+   the threshold, and a selected or highlighted person is always labelled. */
+.wrapper[data-names="off"] :global(.personLabel) {
+  display: none;
+}
+
+.wrapper[data-names="off"].denseZoom :global(.personLabelFull) {
+  display: block;
+}
+
+.wrapper[data-names="off"] :global([data-force-label]) :global(.personLabelShort) {
+  display: block;
+}
+
+.wrapper[data-names="off"].denseZoom :global([data-force-label]) :global(.personLabelShort) {
   display: none;
 }
 

@@ -111,6 +111,8 @@ export interface RiserGridConfig {
   /** top-left of the grid's first (furthest upstage) row */
   originX: number;
   originY: number;
+  /** which edges of the grid perimeter have stairs */
+  stairs: Record<RiserEdge, boolean>;
 }
 
 export interface StageConfig {

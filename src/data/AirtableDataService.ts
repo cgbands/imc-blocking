@@ -44,12 +44,33 @@ export class AirtableDataService implements DataService {
   async savePicture(_picture: Picture): Promise<void> {
     // TODO: PATCH /api/pictures/:id — batch at most 10 records per Airtable request,
     // and respect Airtable's 5 requests/sec limit (queue + throttle server-side).
+    // The server-side handler is also where the editor-role check belongs.
     throw new Error("AirtableDataService.savePicture not implemented");
+  }
+
+  async saveSongPictures(_songId: string, _pictures: Picture[]): Promise<void> {
+    // TODO: POST /api/songs/:songId/pictures — reorder/add/delete in one batch.
+    throw new Error("AirtableDataService.saveSongPictures not implemented");
   }
 
   async saveStageConfig(_config: StageConfig): Promise<void> {
     // TODO: PATCH /api/stage-config
     throw new Error("AirtableDataService.saveStageConfig not implemented");
+  }
+
+  async saveMember(_member: Member): Promise<void> {
+    // TODO: PATCH /api/members/:id — shape/colour/tag are member-level, not per-Picture.
+    throw new Error("AirtableDataService.saveMember not implemented");
+  }
+
+  async saveProps(_props: Prop[]): Promise<void> {
+    // TODO: PATCH /api/props (batch of at most 10 per Airtable request)
+    throw new Error("AirtableDataService.saveProps not implemented");
+  }
+
+  async saveSetlist(_songs: Song[]): Promise<void> {
+    // TODO: PATCH /api/songs — song order only.
+    throw new Error("AirtableDataService.saveSetlist not implemented");
   }
 
   async resetSeed(): Promise<void> {
