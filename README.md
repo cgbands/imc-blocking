@@ -2,15 +2,15 @@
 
 Interactive stage-blocking tool prototype for Indianapolis Men's Chorus. Standalone
 today; built so it can later mount as `<BlockingApp />` inside the member portal with
-Airtable as the data source (see [`docs/AIRTABLE.md`](docs/AIRTABLE.md), coming in a
-later phase).
+Airtable as the data source (see [`docs/AIRTABLE.md`](docs/AIRTABLE.md) for the
+proposed schema and integration plan).
 
-**Status: Phase 5 of 6** — responsive glass/bento shell, 106-person seeded stage,
+**Status: Phase 6 of 6** — responsive glass/bento shell, 106-person seeded stage,
 pinch/pan/wheel zoom, PWA basics, setlist/Picture navigation with play/pause,
 scrubbing and animated transitions, a full editor (drag, multi-select,
 align/distribute, props, stage/riser setup, undo/redo, keyboard shortcuts),
-mic hold/handoff/placement, Find Me, and attendance notes. Phase 6 is the
-performance/polish pass and `docs/AIRTABLE.md`.
+mic hold/handoff/placement, Find Me, attendance notes, nearest-target tap
+resolution, a profiled performance pass, and `docs/AIRTABLE.md`.
 
 ## Run it
 
