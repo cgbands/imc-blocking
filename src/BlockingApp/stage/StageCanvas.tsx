@@ -37,6 +37,8 @@ const MAX_SCALE = 8;
 const DENSE_LABEL_THRESHOLD_PX_PER_FT = 22;
 const LABEL_TARGET_PX = 11;
 const TAP_SLOP_PX = 5;
+/** Half of the 44px minimum touch target, used for nearest-person tap resolution. */
+const TAP_HIT_RADIUS_PX = 22;
 const FIND_ME_SCALE = 3.2;
 const FIND_ME_DURATION_MS = 550;
 
@@ -103,6 +105,33 @@ export function StageCanvas({
   // report the SVG as their target, so the hit test has to be remembered.
   const downInfo = useRef<{ memberId: string | null; clientX: number; clientY: number } | null>(null);
 
+  /**
+   * Replicates the SVG's own preserveAspectRatio="xMidYMid meet" fit math
+   * (uniform scale-to-fit, centered, letterboxed on whichever axis has
+   * slack) purely from state we already hold — not from reading the DOM's
+   * actual CTM. That matters because callers (wheel-zoom, pinch) mutate
+   * view.current and need the *new* fit immediately, before the viewBox
+   * attribute write is applied on the next frame; getScreenCTM() would
+   * still reflect the old (pre-update) geometry at that point.
+   */
+  const getStageFit = useCallback(
+    (w: number, h: number) => {
+      const svg = svgRef.current;
+      const rect = svg?.getBoundingClientRect();
+      const rectW = rect?.width || 1;
+      const rectH = rect?.height || 1;
+      const scalePxPerFt = Math.min(rectW / w, rectH / h);
+      return {
+        scalePxPerFt,
+        left: rect?.left ?? 0,
+        top: rect?.top ?? 0,
+        offsetX: (rectW - w * scalePxPerFt) / 2,
+        offsetY: (rectH - h * scalePxPerFt) / 2,
+      };
+    },
+    [],
+  );
+
   const applyViewBox = useCallback(() => {
     const svg = svgRef.current;
     if (!svg) return;
@@ -111,7 +140,7 @@ export function StageCanvas({
     const h = base.height / scale;
     svg.setAttribute("viewBox", `${cx - w / 2} ${cy - h / 2} ${w} ${h}`);
 
-    const pxPerFt = (svg.clientWidth || 1) / w;
+    const pxPerFt = getStageFit(w, h).scalePxPerFt;
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
 
@@ -126,7 +155,7 @@ export function StageCanvas({
     wrapper.style.setProperty("--label-offset", `${0.95 + fontFt * 0.9}px`);
     wrapper.style.setProperty("--label-offset-alt", `${0.95 + fontFt * 2.05}px`);
     wrapper.style.setProperty("--hairline", `${1 / pxPerFt}px`);
-  }, [base]);
+  }, [base, getStageFit]);
 
   const scheduleApply = useCallback(() => {
     if (rafPending.current) return;
@@ -193,20 +222,28 @@ export function StageCanvas({
 
   const clampScale = (s: number) => Math.min(MAX_SCALE, Math.max(MIN_SCALE, s));
 
+  /**
+   * Converts a client (screen) point to stage feet via the SVG's screen CTM
+   * — the correct way to invert an SVG transform. A naive
+   * (clientX-rect.left)/rect.width mapping against the raw bounding rect is
+   * wrong whenever the container's aspect ratio doesn't match the viewBox's:
+   * the default preserveAspectRatio ("xMidYMid meet") letterboxes the stage,
+   * so part of the bounding rect isn't actually stage content, and that
+   * naive math silently drifts taps and drags away from what's under the
+   * pointer — worse the further the two aspect ratios diverge.
+   */
   const screenToFeet = useCallback(
     (clientX: number, clientY: number) => {
-      const svg = svgRef.current;
-      if (!svg) return { x: 0, y: 0 };
-      const rect = svg.getBoundingClientRect();
       const { cx, cy, scale } = view.current;
       const w = base.width / scale;
       const h = base.height / scale;
+      const fit = getStageFit(w, h);
       return {
-        x: cx - w / 2 + ((clientX - rect.left) / rect.width) * w,
-        y: cy - h / 2 + ((clientY - rect.top) / rect.height) * h,
+        x: cx - w / 2 + (clientX - fit.left - fit.offsetX) / fit.scalePxPerFt,
+        y: cy - h / 2 + (clientY - fit.top - fit.offsetY) / fit.scalePxPerFt,
       };
     },
-    [base],
+    [base, getStageFit],
   );
 
   // Registered natively rather than via onWheel: React attaches wheel
@@ -331,11 +368,44 @@ export function StageCanvas({
     return true;
   };
 
+  /**
+   * Resolves a tap to the nearest person within a fixed on-screen radius
+   * (converted to feet at the current zoom) rather than relying on which
+   * overlapping hit-circle happened to capture the DOM event. In a packed
+   * riser row, several 44px hit targets overlap, and whichever person's
+   * <g> rendered last would otherwise always win the tap regardless of
+   * which icon is actually closest to the finger.
+   */
+  const nearestMemberAt = useCallback(
+    (clientX: number, clientY: number): string | null => {
+      if (people.length === 0) return null;
+      const { scale } = view.current;
+      const pxPerFt = getStageFit(base.width / scale, base.height / scale).scalePxPerFt;
+      const toleranceFt = TAP_HIT_RADIUS_PX / pxPerFt;
+      const feet = screenToFeet(clientX, clientY);
+      let bestId: string | null = null;
+      let bestDist = toleranceFt;
+      for (const p of people) {
+        const d = Math.hypot(p.x - feet.x, p.y - feet.y);
+        if (d <= bestDist) {
+          bestDist = d;
+          bestId = p.memberId;
+        }
+      }
+      return bestId;
+    },
+    [people, base, getStageFit, screenToFeet],
+  );
+
   const onPointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
     const target = e.target as Element;
-    const memberId = target.closest("[data-member-id]")?.getAttribute("data-member-id") ?? null;
-    const propId = target.closest("[data-prop-id]")?.getAttribute("data-prop-id") ?? null;
-    const micId = target.closest("[data-mic-id]")?.getAttribute("data-mic-id") ?? null;
+    // A person within tap tolerance always wins the resolution, even if the
+    // DOM event technically landed on a neighbour's overlapping hit circle
+    // or on a prop/mic — people are the primary interactive objects.
+    const nearestMember = nearestMemberAt(e.clientX, e.clientY);
+    const memberId = nearestMember ?? (target.closest("[data-member-id]")?.getAttribute("data-member-id") ?? null);
+    const propId = memberId ? null : (target.closest("[data-prop-id]")?.getAttribute("data-prop-id") ?? null);
+    const micId = memberId ? null : (target.closest("[data-mic-id]")?.getAttribute("data-mic-id") ?? null);
 
     svgRef.current?.setPointerCapture?.(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });

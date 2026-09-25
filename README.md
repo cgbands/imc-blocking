@@ -135,6 +135,26 @@ future Stage Setup editor (Phase 3) can expose the same config as number inputs.
   Mic changes apply from the current Picture forward, since a mic doesn't jump back
   to a previous carrier.
 
+## Stage hit-testing and tap accuracy
+
+Tapping a person resolves to whichever icon is *nearest* the tap point within
+a fixed on-screen radius (44px, converted to feet at the current zoom) —
+not whichever overlapping hit-circle the browser's native hit test happened
+to pick, which in a packed riser row is unpredictable and often wrong. This
+also means a tiny, tightly-zoomed-out icon always keeps a real 44px+ touch
+target regardless of how small it renders.
+
+All screen-to-stage coordinate conversion (this hit-testing, drag, marquee
+select, and wheel/pinch zoom centering) goes through one `getStageFit()`
+helper in `StageCanvas.tsx` that replicates the SVG's own
+`preserveAspectRatio="xMidYMid meet"` fit math from state we already hold.
+Earlier code computed it naively from `clientWidth / viewBoxWidth`, which
+is only correct when the container's aspect ratio happens to match the
+stage's — otherwise the SVG letterboxes, and that naive math silently
+drifts taps, drags, and zoom-centering away from the actual cursor
+position, worse the more the aspect ratios diverge (so worst on a phone
+in portrait, viewing a wide stage). Fixed for good in this pass.
+
 ## Project layout
 
 - `src/BlockingApp/` — the whole tool, as one self-contained component
