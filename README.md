@@ -155,6 +155,38 @@ drifts taps, drags, and zoom-centering away from the actual cursor
 position, worse the more the aspect ratios diverge (so worst on a phone
 in portrait, viewing a wide stage). Fixed for good in this pass.
 
+## Performance
+
+Profiled with Chrome DevTools Protocol CPU throttling on a simulated iPhone
+viewport (390×844 @3x DPR), measuring real frame-to-frame timing via
+`requestAnimationFrame` during each interaction, 106 people + 3 props + 2
+mics on screen throughout. The profiler (`perf.cjs`, usage notes at the top
+of the file) is committed but not a default dependency — it needs a one-off
+`npm install --no-save playwright-core` to run.
+
+| Scenario | 4× throttle (DevTools "Low-end mobile") | 8× throttle (stress test) |
+|---|---|---|
+| Idle (static stage) | 60.0fps, 0% dropped | 60.0fps, 0% dropped |
+| Pan (single-finger drag) | 60.0fps, 0% dropped | 60.0fps, 0% dropped |
+| Editor drag (moving one person) | 60.0fps, 0% dropped | 60.0fps, 0% dropped |
+| Zoom (wheel/pinch) | 60.0fps, 0% dropped | ~45fps avg, ~9–11% frames <30fps |
+| Transition playback (all 106 animating) | ~59–60fps, 0–1% dropped | ~44–45fps avg, ~8% frames <30fps |
+
+At 4× throttle — DevTools' own standard for "low-end mobile" — every
+interaction holds a locked 60fps. Pushed to 8× (double that, a deliberately
+unrealistic stress test), pan and editor-drag stay pixel-perfect because
+they write directly to the DOM via refs during the gesture, bypassing React
+entirely for motion frames (see `StageCanvas.tsx`). Zoom and transition
+playback are the two paths that still go through React state each frame —
+zoom re-derives label CSS variables and re-checks the dense-zoom threshold
+on every tick, and transition playback re-renders the `<Person>` list itself
+since each one's interpolated x/y changes every frame — so those are the
+first places to apply the same ref-based bypass if a future profiling pass
+on real hardware shows it's needed. Not done in this pass: it would need
+`resolveMics` (which reads live person positions to keep a held mic riding
+on its holder) to read from that same ref-based position source rather than
+the React-computed array, which is more surgery than this pass's budget.
+
 ## Project layout
 
 - `src/BlockingApp/` — the whole tool, as one self-contained component
