@@ -192,6 +192,7 @@ function ShapePicker({
 }
 
 function ColorPicker({ label, value, onChange }: { label: string; value: string; onChange: (color: string) => void }) {
+  const isCustom = !COLORS.includes(value);
   return (
     <div className={styles.field}>
       {label}
@@ -205,6 +206,21 @@ function ColorPicker({ label, value, onChange }: { label: string; value: string;
             aria-label={`${label} ${c}`}
           />
         ))}
+        {/* A native picker for anything the curated palette doesn't cover;
+            it takes on whatever custom colour is already chosen. */}
+        <label
+          className={isCustom ? styles.swatchActive : styles.swatch}
+          style={{ background: isCustom ? value : "conic-gradient(from 0deg, red, yellow, lime, cyan, blue, magenta, red)" }}
+          title="Custom colour"
+        >
+          <input
+            type="color"
+            value={isCustom ? value : "#888888"}
+            onChange={(e) => onChange(e.target.value)}
+            className={styles.colorInput}
+            aria-label={`${label} custom`}
+          />
+        </label>
       </div>
     </div>
   );

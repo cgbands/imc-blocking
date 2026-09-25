@@ -39,6 +39,8 @@ export function PhoneLayout(props: LayoutProps) {
     onToggleTrails,
     showNames,
     onToggleNames,
+    transitionSpeed,
+    onSetTransitionSpeed,
     isolatedMemberId,
     onSelectPerson,
     absentSongIds,
@@ -188,6 +190,8 @@ export function PhoneLayout(props: LayoutProps) {
           onToggleTrails={onToggleTrails}
           showNames={showNames}
           onToggleNames={onToggleNames}
+          transitionSpeed={transitionSpeed}
+          onSetTransitionSpeed={onSetTransitionSpeed}
           compact
           canEdit={canEdit}
           onMovePicture={onMovePicture}

@@ -1,6 +1,9 @@
 import type { Picture } from "../../types";
+import type { TransitionSpeed } from "../playbackSpeed";
 import styles from "./panels.module.css";
 import editorStyles from "./editor.module.css";
+
+const SPEED_LABELS: Record<TransitionSpeed, string> = { slow: "Slow", normal: "Normal", fast: "Fast" };
 
 interface PictureNavProps {
   pictures: Picture[];
@@ -18,6 +21,8 @@ interface PictureNavProps {
   onToggleTrails: (value: boolean) => void;
   showNames: boolean;
   onToggleNames: (value: boolean) => void;
+  transitionSpeed: TransitionSpeed;
+  onSetTransitionSpeed: (speed: TransitionSpeed) => void;
   compact?: boolean;
   canEdit?: boolean;
   onMovePicture?: (index: number, delta: number) => void;
@@ -42,6 +47,8 @@ export function PictureNav({
   onToggleTrails,
   showNames,
   onToggleNames,
+  transitionSpeed,
+  onSetTransitionSpeed,
   compact,
   canEdit,
   onMovePicture,
@@ -91,6 +98,19 @@ export function PictureNav({
           <input type="checkbox" checked={showNames} onChange={(e) => onToggleNames(e.target.checked)} />
           Names
         </label>
+      </div>
+
+      <div className={styles.speedRow}>
+        <span className={styles.speedLabel}>Speed</span>
+        {(Object.keys(SPEED_LABELS) as TransitionSpeed[]).map((speed) => (
+          <button
+            key={speed}
+            className={speed === transitionSpeed ? editorStyles.chipActive : editorStyles.chip}
+            onClick={() => onSetTransitionSpeed(speed)}
+          >
+            {SPEED_LABELS[speed]}
+          </button>
+        ))}
       </div>
 
       {!compact && (

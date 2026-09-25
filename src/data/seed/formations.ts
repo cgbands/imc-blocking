@@ -1,16 +1,27 @@
-import type { PersonPlacement, PositionZone, StageConfig } from "../../types";
+import type { Point, PersonPlacement, PositionZone, StageConfig } from "../../types";
 
 interface FormationOptions {
   /** how many of the given member ids to tuck into the wings instead of the main formation */
   wingsCount?: number;
 }
 
+/**
+ * Position of the `index`-th person queued in one wing (0 = closest to the
+ * stage edge). Shared by the seed generator and the editor's drag-to-wings
+ * snapping, so a person dropped in the wings lines up in the same queue a
+ * freshly-generated Picture would use.
+ */
+export function wingSlotPosition(side: "wings-left" | "wings-right", index: number, stageWidth: number): Point {
+  const x = side === "wings-left" ? -4 - (index % 3) * 2 : stageWidth + 4 + (index % 3) * 2;
+  const y = 6 + index * 3;
+  return { x, y };
+}
+
 function wingPlacements(ids: string[], stage: StageConfig): PersonPlacement[] {
+  const counts = { "wings-left": 0, "wings-right": 0 } as Record<"wings-left" | "wings-right", number>;
   return ids.map((memberId, i) => {
     const side: PositionZone = i % 2 === 0 ? "wings-left" : "wings-right";
-    const laneIndex = Math.floor(i / 2);
-    const x = side === "wings-left" ? -4 - (laneIndex % 3) * 2 : stage.width + 4 + (laneIndex % 3) * 2;
-    const y = 6 + laneIndex * 3;
+    const { x, y } = wingSlotPosition(side, counts[side]++, stage.width);
     return { memberId, x, y, zone: side };
   });
 }

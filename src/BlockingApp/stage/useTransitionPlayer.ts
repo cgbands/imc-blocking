@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
-/** How long one Picture-to-Picture transition takes. */
-const TRANSITION_MS = 1400;
+/** Default time for one Picture-to-Picture transition, at normal speed. */
+export const DEFAULT_TRANSITION_MS = 1400;
 const EPSILON = 1e-4;
 
 interface PlayerState {
@@ -20,12 +20,14 @@ const IDLE: PlayerState = { index: 0, progress: 0, target: null, playingToEnd: f
  * Stepping and jumping animate people along their paths rather than cutting,
  * in both directions. `resetKey` (the current song id) resets to Picture 0.
  */
-export function useTransitionPlayer(length: number, resetKey: string) {
+export function useTransitionPlayer(length: number, resetKey: string, durationMs = DEFAULT_TRANSITION_MS) {
   const [state, setState] = useState<PlayerState>(IDLE);
   const rafRef = useRef<number | null>(null);
   const lastTsRef = useRef<number | null>(null);
   const lengthRef = useRef(length);
   lengthRef.current = length;
+  const durationRef = useRef(durationMs);
+  durationRef.current = durationMs;
 
   useEffect(() => {
     setState(IDLE);
@@ -48,7 +50,7 @@ export function useTransitionPlayer(length: number, resetKey: string) {
       setState((prev) => {
         if (prev.target == null) return prev;
         const pos = prev.index + prev.progress;
-        const step = dt / TRANSITION_MS;
+        const step = dt / durationRef.current;
         const next = prev.target > pos ? Math.min(pos + step, prev.target) : Math.max(pos - step, prev.target);
 
         if (Math.abs(next - prev.target) < EPSILON) {

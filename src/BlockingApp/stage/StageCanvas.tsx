@@ -503,15 +503,17 @@ export function StageCanvas({
     onSelectPerson(down.memberId);
   };
 
+  // The grid is a staging aid for editors, not something the cast sees
+  // during a run-through, so it's edit-mode only.
   const gridLines = useMemo(() => {
     const spacing = stageConfig.gridSpacingFt;
-    if (!spacing) return null;
+    if (!spacing || !editMode) return null;
     const verticals: number[] = [];
     const horizontals: number[] = [];
     for (let x = 0; x <= stageConfig.width; x += spacing) verticals.push(x);
     for (let y = 0; y <= stageConfig.height; y += spacing) horizontals.push(y);
     return { verticals, horizontals };
-  }, [stageConfig]);
+  }, [stageConfig, editMode]);
 
   return (
     <div ref={wrapperRef} className={styles.wrapper} data-edit={editMode || undefined} data-names={showNames ? "on" : "off"}>

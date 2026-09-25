@@ -3,7 +3,8 @@ import type { DataService } from "../data/DataService";
 import { MockDataService } from "../data/MockDataService";
 import type { Member, Mic, Picture, Prop, Song, StageConfig } from "../types";
 import { useViewport } from "./layout/useViewport";
-import { useTransitionPlayer } from "./stage/useTransitionPlayer";
+import { useTransitionPlayer, DEFAULT_TRANSITION_MS } from "./stage/useTransitionPlayer";
+import { TRANSITION_SPEEDS, type TransitionSpeed } from "./playbackSpeed";
 import { useEditor } from "./editor/useEditor";
 import { useKeyboardShortcuts } from "./editor/useKeyboardShortcuts";
 import { PhoneLayout } from "./layout/PhoneLayout";
@@ -28,6 +29,7 @@ interface ShowState {
 }
 
 const CAN_EDIT_STORAGE_KEY = "imc-blocking:can-edit";
+const SPEED_STORAGE_KEY = "imc-blocking:transition-speed";
 
 export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initialCanEdit, dataService }: BlockingAppProps) {
   const service = useMemo(() => dataService ?? new MockDataService(), [dataService]);
@@ -52,6 +54,22 @@ export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initial
   const [isolatedMemberId, setIsolatedMemberId] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [findMeActive, setFindMeActive] = useState(false);
+  const [transitionSpeed, setTransitionSpeed] = useState<TransitionSpeed>(() => {
+    try {
+      const stored = localStorage.getItem(SPEED_STORAGE_KEY);
+      return stored === "slow" || stored === "normal" || stored === "fast" ? stored : "normal";
+    } catch {
+      return "normal";
+    }
+  });
+  const handleSetTransitionSpeed = (speed: TransitionSpeed) => {
+    setTransitionSpeed(speed);
+    try {
+      localStorage.setItem(SPEED_STORAGE_KEY, speed);
+    } catch {
+      // no persistence available — speed just won't survive a reload
+    }
+  };
 
   const loadAll = async () => {
     const [members, songs, stageConfig, props, mics] = await Promise.all([
@@ -84,7 +102,11 @@ export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initial
     [show, currentSongId],
   );
 
-  const player = useTransitionPlayer(songPictures.length, currentSongId ?? "");
+  const player = useTransitionPlayer(
+    songPictures.length,
+    currentSongId ?? "",
+    DEFAULT_TRANSITION_MS / TRANSITION_SPEEDS[transitionSpeed],
+  );
   const currentPicture = songPictures[player.index];
   const nextPicture = songPictures[player.index + 1] ?? null;
 
@@ -195,6 +217,8 @@ export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initial
     onToggleTrails: setShowTrails,
     showNames,
     onToggleNames: setShowNames,
+    transitionSpeed,
+    onSetTransitionSpeed: handleSetTransitionSpeed,
 
     members: show.members,
     membersById,

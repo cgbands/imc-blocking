@@ -77,11 +77,18 @@ Log in as an editor and you get a toolbar above the stage plus an Inspector pane
   them in the Inspector applies across every Picture.
 - **Pictures**: reorder, duplicate, or delete from the Pictures list; songs
   reorder from the Setlist.
-- **Stage setup**: stage size, riser rows/columns/size/gaps, which perimeter
-  edges have stairs, grid spacing (off / 1 / 2 / 5 ft) and snap-to-grid.
+- **Stage setup**: quick presets (No risers / 3×3 / 5×5 / 6×6) or full control
+  over riser rows/columns/size/gaps, which perimeter edges have stairs, stage
+  size, grid spacing (off / 1 / 2 / 5 ft) and snap-to-grid. The grid itself
+  only renders in edit mode — it's a staging aid, not something the cast sees.
 - **Mics**: select a person and use the Inspector's Mics section to hand a mic
   to them, hand it off from whoever has it, or put it down. A mic nobody is
   holding can be dragged anywhere (including onto a mic-stand spot).
+- **Colour**: shape/tag/prop colour pickers have a curated swatch row plus a
+  native colour input for anything outside it.
+- **Wings**: dropping someone in the wings snaps them into the next open slot
+  in that side's queue (matching the seeded layout) instead of leaving gaps —
+  so the wings always read as a tidy line, not scattered icons.
 - **Undo/redo**: Cmd/Ctrl+Z and Cmd/Ctrl+Shift+Z. Press `?` for the full
   shortcut list.
 
@@ -103,6 +110,10 @@ off, since the target it was tracking is no longer the current context.
 The same "You're not in this picture" note also always shows in the Pictures
 panel (not just after pressing Find Me), and the Setlist marks any song the
 current member is in zero Pictures of with "You're not in this song."
+
+**Transition speed**: Slow / Normal / Fast chips next to the Pictures list
+control how long a Picture-to-Picture transition takes; the choice persists
+across reloads.
 
 ## Stage / risers
 

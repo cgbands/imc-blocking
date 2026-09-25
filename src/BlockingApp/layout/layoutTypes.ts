@@ -1,5 +1,6 @@
 import type { Member, Mic, MicPlacement, Picture, Prop, PropKind, Song, StageConfig } from "../../types";
 import type { SelectionState } from "../editor/useEditor";
+import type { TransitionSpeed } from "../playbackSpeed";
 
 export interface LayoutProps {
   stageConfig: StageConfig;
@@ -25,6 +26,8 @@ export interface LayoutProps {
   onToggleTrails: (value: boolean) => void;
   showNames: boolean;
   onToggleNames: (value: boolean) => void;
+  transitionSpeed: TransitionSpeed;
+  onSetTransitionSpeed: (speed: TransitionSpeed) => void;
 
   members: Member[];
   membersById: Map<string, Member>;

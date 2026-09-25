@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { RiserEdge, StageConfig } from "../../types";
+import type { RiserEdge, RiserGridConfig, StageConfig } from "../../types";
 import { buildRiserGrid, centeredOriginX } from "../../data/seed/riserGrid";
 import styles from "./editor.module.css";
 
@@ -10,6 +10,26 @@ interface StageSetupPanelProps {
 
 const GRID_OPTIONS: StageConfig["gridSpacingFt"][] = [0, 1, 2, 5];
 const STAIR_EDGES: RiserEdge[] = ["front", "back", "left", "right"];
+
+/** Quick-start layouts, sized to whatever the current stage width is. */
+function presetRiserGrid(rows: number, cols: number, stageWidth: number, stairs: RiserGridConfig["stairs"]): RiserGridConfig {
+  if (rows === 0 || cols === 0) {
+    return { rows: 0, cols: 0, riserWidth: 1, riserHeight: 1, gapX: 1, gapY: 1, originX: 0, originY: 2, stairs };
+  }
+  const gapX = 1.2;
+  const gapY = 1.1;
+  const riserWidth = Math.max(3, (stageWidth * 0.72 - (cols - 1) * gapX) / cols);
+  const grid: RiserGridConfig = { rows, cols, riserWidth, riserHeight: 3.2, gapX, gapY, originX: 0, originY: 2, stairs };
+  grid.originX = centeredOriginX(grid, stageWidth);
+  return grid;
+}
+
+const PRESETS: { label: string; rows: number; cols: number }[] = [
+  { label: "No risers", rows: 0, cols: 0 },
+  { label: "3 × 3", rows: 3, cols: 3 },
+  { label: "5 × 5", rows: 5, cols: 5 },
+  { label: "6 × 6", rows: 6, cols: 6 },
+];
 
 export function StageSetupPanel({ stageConfig, onChange }: StageSetupPanelProps) {
   const [open, setOpen] = useState(false);
@@ -68,25 +88,39 @@ export function StageSetupPanel({ stageConfig, onChange }: StageSetupPanelProps)
           </div>
 
           <h3 className={styles.setupHeading}>Risers</h3>
+          <div className={styles.checkRow}>
+            {PRESETS.map((preset) => (
+              <button
+                key={preset.label}
+                className={grid.rows === preset.rows && grid.cols === preset.cols ? styles.chipActive : styles.chip}
+                onClick={() => {
+                  const nextGrid = presetRiserGrid(preset.rows, preset.cols, stageConfig.width, grid.stairs);
+                  onChange({ ...stageConfig, riserGrid: nextGrid, risers: buildRiserGrid(nextGrid) });
+                }}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
           <div className={styles.fieldRow}>
             <label className={styles.field}>
               Rows
               <input
                 type="number"
-                min={1}
+                min={0}
                 max={10}
                 value={grid.rows}
-                onChange={(e) => patchGrid({ rows: Math.max(1, Number(e.target.value)) })}
+                onChange={(e) => patchGrid({ rows: Math.max(0, Number(e.target.value)) })}
               />
             </label>
             <label className={styles.field}>
               Across
               <input
                 type="number"
-                min={1}
+                min={0}
                 max={12}
                 value={grid.cols}
-                onChange={(e) => patchGrid({ cols: Math.max(1, Number(e.target.value)) })}
+                onChange={(e) => patchGrid({ cols: Math.max(0, Number(e.target.value)) })}
               />
             </label>
           </div>

@@ -122,6 +122,18 @@
   text-align: center;
 }
 
+.speedRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.speedLabel {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-right: 0.2rem;
+}
+
 .toggleRow {
   display: flex;
   align-items: center;

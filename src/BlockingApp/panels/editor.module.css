@@ -189,6 +189,8 @@
 
 .swatch,
 .swatchActive {
+  position: relative;
+  display: inline-block;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -199,6 +201,17 @@
 .swatchActive {
   border-color: var(--text-strong);
   box-shadow: 0 0 0 2px var(--surface-1) inset;
+}
+
+.colorInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
 }
 
 .micRow {

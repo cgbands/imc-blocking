@@ -37,6 +37,8 @@ export function TabletLayout(props: LayoutProps) {
     onToggleTrails,
     showNames,
     onToggleNames,
+    transitionSpeed,
+    onSetTransitionSpeed,
     isolatedMemberId,
     onSelectPerson,
     absentSongIds,
@@ -127,6 +129,8 @@ export function TabletLayout(props: LayoutProps) {
             onToggleTrails={onToggleTrails}
             showNames={showNames}
             onToggleNames={onToggleNames}
+            transitionSpeed={transitionSpeed}
+            onSetTransitionSpeed={onSetTransitionSpeed}
             canEdit={canEdit}
             onMovePicture={onMovePicture}
             onDuplicatePicture={onDuplicatePicture}

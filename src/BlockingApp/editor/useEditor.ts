@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import type { DataService } from "../../data/DataService";
-import type { Member, Picture, Prop, PropKind, Song, StageConfig } from "../../types";
+import type { Member, Picture, PositionZone, Prop, PropKind, Song, StageConfig } from "../../types";
+import { wingSlotPosition } from "../../data/seed/formations";
 
 const HISTORY_LIMIT = 60;
 
@@ -145,19 +146,42 @@ export function useEditor({
 
   // --- People -------------------------------------------------------------
 
-  /** Commits new positions for a set of people in the current Picture. */
+  /**
+   * Commits new positions for a set of people in the current Picture. A
+   * person dropped in the wings snaps into the next open slot in that
+   * side's queue (rather than sitting wherever the cursor let go), so the
+   * wings always read as a tidy line — matching how the seed data lays
+   * them out, and letting them "shift up" instead of leaving gaps as
+   * people move on- and off-stage.
+   */
   const movePeopleTo = useCallback(
     (moves: { memberId: string; x: number; y: number }[]) => {
-      if (!currentPicture || !currentSongId || moves.length === 0) return;
-      const byId = new Map(moves.map((m) => [m.memberId, m]));
+      if (!currentPicture || !currentSongId || moves.length === 0 || !stageConfig) return;
+      const movingIds = new Set(moves.map((m) => m.memberId));
+      const wingCounts = { "wings-left": 0, "wings-right": 0 } as Record<"wings-left" | "wings-right", number>;
+      for (const p of currentPicture.people) {
+        if (movingIds.has(p.memberId)) continue;
+        if (p.zone === "wings-left" || p.zone === "wings-right") wingCounts[p.zone]++;
+      }
+
+      const resolved = new Map<string, { x: number; y: number; zone: PositionZone }>();
+      for (const move of moves) {
+        const x = snapValue(move.x);
+        const y = snapValue(move.y);
+        const zone = zoneForX(x, stageConfig);
+        if (zone === "wings-left" || zone === "wings-right") {
+          const slot = wingSlotPosition(zone, wingCounts[zone]++, stageConfig.width);
+          resolved.set(move.memberId, { x: slot.x, y: slot.y, zone });
+        } else {
+          resolved.set(move.memberId, { x, y, zone });
+        }
+      }
+
       const after: Picture = {
         ...currentPicture,
         people: currentPicture.people.map((p) => {
-          const move = byId.get(p.memberId);
-          if (!move) return p;
-          const x = snapValue(move.x);
-          const y = snapValue(move.y);
-          return { ...p, x, y, zone: zoneForX(x, stageConfig) };
+          const move = resolved.get(p.memberId);
+          return move ? { ...p, ...move } : p;
         }),
       };
       apply({ kind: "picture", songId: currentSongId, before: currentPicture, after });

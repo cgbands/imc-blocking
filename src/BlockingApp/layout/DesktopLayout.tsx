@@ -37,6 +37,8 @@ export function DesktopLayout(props: LayoutProps) {
     onToggleTrails,
     showNames,
     onToggleNames,
+    transitionSpeed,
+    onSetTransitionSpeed,
     isolatedMemberId,
     onSelectPerson,
     absentSongIds,
@@ -144,6 +146,8 @@ export function DesktopLayout(props: LayoutProps) {
             onToggleTrails={onToggleTrails}
             showNames={showNames}
             onToggleNames={onToggleNames}
+            transitionSpeed={transitionSpeed}
+            onSetTransitionSpeed={onSetTransitionSpeed}
             canEdit={canEdit}
             onMovePicture={onMovePicture}
             onDuplicatePicture={onDuplicatePicture}
