@@ -51,6 +51,13 @@
   color: var(--text);
 }
 
+.absentNote {
+  margin: 0.15rem 0 0.3rem 0.25rem;
+  font-size: 0.72rem;
+  color: #b0405f;
+  font-weight: 600;
+}
+
 .hint {
   margin-top: auto;
   font-size: 0.75rem;

@@ -39,6 +39,11 @@ export function DesktopLayout(props: LayoutProps) {
     onToggleNames,
     isolatedMemberId,
     onSelectPerson,
+    absentSongIds,
+    findMeActive,
+    onFindMe,
+    memberInCurrentPicture,
+    highlightedMemberId,
     members,
     currentMemberId,
     canEdit,
@@ -82,7 +87,7 @@ export function DesktopLayout(props: LayoutProps) {
       <div className={styles.topBar}>
         <span className={styles.wordmark}>Indianapolis Men&rsquo;s Chorus</span>
         <div className={styles.topBarActions}>
-          <FindMeButton />
+          <FindMeButton active={findMeActive} onClick={onFindMe} inPicture={memberInCurrentPicture} />
           <button className={styles.helpBtn} onClick={onShowHelp} title="Keyboard shortcuts (?)">
             ?
           </button>
@@ -121,6 +126,7 @@ export function DesktopLayout(props: LayoutProps) {
             onSelectSong={onSelectSong}
             canEdit={canEdit}
             onMoveSong={onMoveSong}
+            absentSongIds={absentSongIds}
           />
           <PictureNav
             pictures={songPictures}
@@ -142,6 +148,7 @@ export function DesktopLayout(props: LayoutProps) {
             onMovePicture={onMovePicture}
             onDuplicatePicture={onDuplicatePicture}
             onDeletePicture={onDeletePicture}
+            memberInCurrentPicture={memberInCurrentPicture}
           />
         </div>
 
@@ -157,6 +164,7 @@ export function DesktopLayout(props: LayoutProps) {
             showTrails={showTrails || isAnimating}
             showNames={showNames}
             isolatedMemberId={isolatedMemberId}
+            highlightedMemberId={highlightedMemberId}
             onSelectPerson={onSelectPerson}
             editMode={canEdit}
             coarsePointer={coarsePointer}

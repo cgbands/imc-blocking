@@ -51,6 +51,7 @@ export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initial
   });
   const [isolatedMemberId, setIsolatedMemberId] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [findMeActive, setFindMeActive] = useState(false);
 
   const loadAll = async () => {
     const [members, songs, stageConfig, props, mics] = await Promise.all([
@@ -87,6 +88,26 @@ export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initial
   const currentPicture = songPictures[player.index];
   const nextPicture = songPictures[player.index + 1] ?? null;
 
+  // Attendance: is the logged-in member in the Picture on screen, and which
+  // songs (if any) they're in zero Pictures of.
+  const memberInCurrentPicture = currentPicture ? currentPicture.people.some((p) => p.memberId === currentMemberId) : true;
+  const absentSongIds = useMemo(() => {
+    const set = new Set<string>();
+    if (!show || !currentMemberId) return set;
+    for (const song of show.songs) {
+      const inSong = show.pictures.some((p) => p.songId === song.id && p.people.some((pl) => pl.memberId === currentMemberId));
+      if (!inSong) set.add(song.id);
+    }
+    return set;
+  }, [show, currentMemberId]);
+
+  // Find Me turns itself off if the context it was following changes from
+  // under it (switching songs, or who's "logged in" via Dev Controls).
+  useEffect(() => {
+    setFindMeActive(false);
+  }, [currentSongId, currentMemberId]);
+  const handleFindMe = () => setFindMeActive((v) => !v);
+
   const editor = useEditor({
     service,
     canEdit,
@@ -114,9 +135,7 @@ export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initial
     onRedo: editor.redo,
     onDuplicatePicture: () => editor.duplicatePicture(player.index),
     onDelete: editor.removeSelectionFromPicture,
-    onFindMe: () => {
-      // Wired up in Phase 5.
-    },
+    onFindMe: handleFindMe,
     onToggleHelp: () => setShowHelp((v) => !v),
     onEscape: () => {
       editor.clearSelection();
@@ -183,6 +202,12 @@ export function BlockingApp({ currentMemberId: initialMemberId, canEdit: initial
     micsById,
     isolatedMemberId,
     onSelectPerson: handleSelectPerson,
+    absentSongIds,
+
+    findMeActive,
+    onFindMe: handleFindMe,
+    memberInCurrentPicture,
+    highlightedMemberId: findMeActive ? currentMemberId : null,
 
     currentMemberId,
     canEdit,

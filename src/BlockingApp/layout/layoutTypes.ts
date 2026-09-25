@@ -32,6 +32,12 @@ export interface LayoutProps {
   micsById: Map<string, Mic>;
   isolatedMemberId: string | null;
   onSelectPerson: (memberId: string) => void;
+  absentSongIds: Set<string>;
+
+  findMeActive: boolean;
+  onFindMe: () => void;
+  memberInCurrentPicture: boolean;
+  highlightedMemberId: string | null;
 
   currentMemberId: string;
   canEdit: boolean;

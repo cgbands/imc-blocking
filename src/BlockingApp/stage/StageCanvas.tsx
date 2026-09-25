@@ -14,6 +14,7 @@ interface StageCanvasProps {
   membersById: Map<string, Member>;
   propsById: Map<string, Prop>;
   micsById: Map<string, Mic>;
+  /** Also the Find Me target: the camera follows this person while set. */
   highlightedMemberId?: string | null;
   isolatedMemberId?: string | null;
   showTrails?: boolean;
@@ -36,6 +37,8 @@ const MAX_SCALE = 8;
 const DENSE_LABEL_THRESHOLD_PX_PER_FT = 22;
 const LABEL_TARGET_PX = 11;
 const TAP_SLOP_PX = 5;
+const FIND_ME_SCALE = 3.2;
+const FIND_ME_DURATION_MS = 550;
 
 const EMPTY_SELECTION: SelectionState = { memberIds: [], propIds: [] };
 
@@ -139,6 +142,34 @@ export function StageCanvas({
     applyViewBox();
   }, [base, applyViewBox]);
 
+  // Eased camera pan/zoom used by Find Me. Runs its own rAF loop (separate
+  // from the pan/zoom gesture code above) since it animates over a fixed
+  // duration rather than reacting to input.
+  const followRaf = useRef<number | null>(null);
+  const animateViewTo = useCallback(
+    (targetCx: number, targetCy: number, targetScale: number, duration = FIND_ME_DURATION_MS) => {
+      if (followRaf.current != null) cancelAnimationFrame(followRaf.current);
+      const start = { ...view.current };
+      const startTime = performance.now();
+      const step = (now: number) => {
+        const t = Math.min(1, (now - startTime) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        view.current = {
+          cx: start.cx + (targetCx - start.cx) * eased,
+          cy: start.cy + (targetCy - start.cy) * eased,
+          scale: start.scale + (targetScale - start.scale) * eased,
+        };
+        applyViewBox();
+        followRaf.current = t < 1 ? requestAnimationFrame(step) : null;
+      };
+      followRaf.current = requestAnimationFrame(step);
+    },
+    [applyViewBox],
+  );
+  useEffect(() => () => {
+    if (followRaf.current != null) cancelAnimationFrame(followRaf.current);
+  }, []);
+
   useEffect(() => {
     const onResize = () => scheduleApply();
     window.addEventListener("resize", onResize);
@@ -206,6 +237,21 @@ export function StageCanvas({
     [picture, nextPicture, progress, peopleNow],
   );
   const nextPeopleById = useMemo(() => new Map((nextPicture?.people ?? []).map((p) => [p.memberId, p])), [nextPicture]);
+
+  // Find Me: follow the highlighted person's live (interpolated) position —
+  // re-centering as they move through a transition — and zoom back out to
+  // the full stage the moment nobody is being followed.
+  const followTarget = highlightedMemberId ? people.find((p) => p.memberId === highlightedMemberId) : undefined;
+  const followX = followTarget?.x;
+  const followY = followTarget?.y;
+  useEffect(() => {
+    if (highlightedMemberId && followX != null && followY != null) {
+      animateViewTo(followX, followY, FIND_ME_SCALE);
+    } else if (!highlightedMemberId) {
+      animateViewTo(base.x + base.width / 2, base.y + base.height / 2, 1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlightedMemberId, followX, followY]);
 
   const selectedMembers = useMemo(() => new Set(selection.memberIds), [selection]);
   const selectedProps = useMemo(() => new Set(selection.propIds), [selection]);

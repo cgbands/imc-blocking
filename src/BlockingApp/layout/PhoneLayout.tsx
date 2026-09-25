@@ -41,6 +41,11 @@ export function PhoneLayout(props: LayoutProps) {
     onToggleNames,
     isolatedMemberId,
     onSelectPerson,
+    absentSongIds,
+    findMeActive,
+    onFindMe,
+    memberInCurrentPicture,
+    highlightedMemberId,
     members,
     currentMemberId,
     canEdit,
@@ -112,6 +117,7 @@ export function PhoneLayout(props: LayoutProps) {
           showTrails={showTrails || isAnimating}
           showNames={showNames}
           isolatedMemberId={isolatedMemberId}
+          highlightedMemberId={highlightedMemberId}
           onSelectPerson={onSelectPerson}
           editMode={canEdit}
           coarsePointer={coarsePointer}
@@ -122,7 +128,7 @@ export function PhoneLayout(props: LayoutProps) {
           onMoveMics={onMoveMics}
           snapValue={snapValue}
         />
-        {!canEdit && <FindMeButton floating />}
+        <FindMeButton floating active={findMeActive} onClick={onFindMe} inPicture={memberInCurrentPicture} />
       </div>
 
       <Sheet onStateChange={setSheetState}>
@@ -164,6 +170,7 @@ export function PhoneLayout(props: LayoutProps) {
           compact
           canEdit={canEdit}
           onMoveSong={onMoveSong}
+          absentSongIds={absentSongIds}
         />
         <PictureNav
           pictures={songPictures}
@@ -186,6 +193,7 @@ export function PhoneLayout(props: LayoutProps) {
           onMovePicture={onMovePicture}
           onDuplicatePicture={onDuplicatePicture}
           onDeletePicture={onDeletePicture}
+          memberInCurrentPicture={memberInCurrentPicture}
         />
         {canEdit && <StageSetupPanel stageConfig={stageConfig} onChange={onUpdateStageConfig} />}
       </Sheet>

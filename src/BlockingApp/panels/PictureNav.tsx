@@ -23,6 +23,7 @@ interface PictureNavProps {
   onMovePicture?: (index: number, delta: number) => void;
   onDuplicatePicture?: (index: number) => void;
   onDeletePicture?: (index: number) => void;
+  memberInCurrentPicture?: boolean;
 }
 
 export function PictureNav({
@@ -46,6 +47,7 @@ export function PictureNav({
   onMovePicture,
   onDuplicatePicture,
   onDeletePicture,
+  memberInCurrentPicture = true,
 }: PictureNavProps) {
   const current = pictures[currentIndex];
   const max = Math.max(pictures.length - 1, 0);
@@ -78,6 +80,7 @@ export function PictureNav({
       />
 
       <div className={styles.currentLabel}>{current ? `${currentIndex + 1}. ${current.label}` : "—"}</div>
+      {!memberInCurrentPicture && <p className={styles.absentNote}>You&rsquo;re not in this picture.</p>}
 
       <div className={styles.toggleRow}>
         <label className={styles.trailsToggle}>

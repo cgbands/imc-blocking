@@ -1,3 +1,19 @@
+.inlineWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.floatingWrap {
+  position: absolute;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
 .inline,
 .floating {
   display: inline-flex;
@@ -17,9 +33,25 @@
 }
 
 .floating {
-  position: absolute;
-  right: max(1rem, env(safe-area-inset-right));
-  bottom: max(1rem, env(safe-area-inset-bottom));
   box-shadow: 0 6px 20px rgba(20, 60, 100, 0.25);
-  z-index: 30;
+}
+
+.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+
+.note {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  background: rgba(176, 64, 95, 0.12);
+  border: 1px solid rgba(176, 64, 95, 0.3);
+  color: #b0405f;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
 }

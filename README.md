@@ -5,11 +5,12 @@ today; built so it can later mount as `<BlockingApp />` inside the member portal
 Airtable as the data source (see [`docs/AIRTABLE.md`](docs/AIRTABLE.md), coming in a
 later phase).
 
-**Status: Phase 4 of 6** — responsive glass/bento shell, 106-person seeded stage,
+**Status: Phase 5 of 6** — responsive glass/bento shell, 106-person seeded stage,
 pinch/pan/wheel zoom, PWA basics, setlist/Picture navigation with play/pause,
 scrubbing and animated transitions, a full editor (drag, multi-select,
-align/distribute, props, stage/riser setup, undo/redo, keyboard shortcuts), and
-mic hold/handoff/placement. Find Me and attendance notes land in Phase 5.
+align/distribute, props, stage/riser setup, undo/redo, keyboard shortcuts),
+mic hold/handoff/placement, Find Me, and attendance notes. Phase 6 is the
+performance/polish pass and `docs/AIRTABLE.md`.
 
 ## Run it
 
@@ -88,6 +89,20 @@ Every edit funnels through `apply()` in `src/BlockingApp/editor/useEditor.ts`,
 which calls the `DataService`. `canEdit` is a UI guard only — the server-side
 role check belongs behind those `DataService` calls once this talks to a real
 backend.
+
+## Find Me and attendance
+
+**Find Me** (every device) highlights the current member's icon with a pulsing
+ring and pans/zooms the stage to them — pressing it again zooms back out. If
+they're not in the current Picture, the button shows "You're not in this
+picture" instead of moving the camera. While active, the camera keeps
+following them as you step, scrub, or play through Pictures, including mid-
+transition. Switching songs or "logged-in member" (Dev panel) turns Find Me
+off, since the target it was tracking is no longer the current context.
+
+The same "You're not in this picture" note also always shows in the Pictures
+panel (not just after pressing Find Me), and the Setlist marks any song the
+current member is in zero Pictures of with "You're not in this song."
 
 ## Stage / risers
 
