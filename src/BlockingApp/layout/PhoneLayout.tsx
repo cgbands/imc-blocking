@@ -133,7 +133,7 @@ export function PhoneLayout(props: LayoutProps) {
         <FindMeButton floating active={findMeActive} onClick={onFindMe} inPicture={memberInCurrentPicture} />
       </div>
 
-      <Sheet onStateChange={setSheetState}>
+      <Sheet onStateChange={setSheetState} label="Setlist & Pictures">
         {/* On a phone the editor tools live in the sheet rather than floating
             over the stage, where they would collide with it. */}
         {canEdit && (

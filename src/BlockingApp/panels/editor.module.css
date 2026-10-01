@@ -1,10 +1,13 @@
-/* --- Toolbar --- */
-.toolbar,
-.toolbarFloating {
+/* --- Toolbar ---
+   .toolbarWrap/.toolbarFloatingWrap are the card (background/border); .toolbar
+   is just the icon row inside it, with a second line below for a plain-text
+   hint — so the hint never has to squeeze into (or scroll away inside) the
+   icon row itself. */
+.toolbarWrap,
+.toolbarFloatingWrap {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.3rem;
   padding: 0.5rem 0.75rem;
   border-radius: var(--radius-md);
   background: var(--surface-glass);
@@ -13,12 +16,39 @@
   border: 1px solid var(--surface-border);
 }
 
-.toolbar[data-scrollable],
-.toolbarFloating[data-scrollable] {
+.toolbarFloatingWrap {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 20;
+  box-shadow: 0 8px 24px rgba(20, 60, 100, 0.2);
+  max-width: calc(100% - 2rem);
+}
+
+.toolbarFloatingWrap .toolbarCaptionLine {
+  text-align: center;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.toolbarFloatingWrap .toolbar {
+  justify-content: center;
+}
+
+.toolbar[data-scrollable] {
   flex-wrap: nowrap;
   overflow-x: auto;
   overflow-y: hidden;
   justify-content: flex-start;
+}
+
+.toolbarWrap[data-scrollable] {
   border-radius: 0;
   border: none;
   border-bottom: 1px solid var(--surface-border);
@@ -27,19 +57,13 @@
   -webkit-backdrop-filter: none;
 }
 
-.toolbar[data-scrollable] .toolGroup {
+.toolbar[data-scrollable] .toolGroup,
+.toolbar[data-scrollable] .toolGroupLabeled {
   flex: 0 0 auto;
 }
 
-.toolbarFloating {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: max(1rem, env(safe-area-inset-bottom));
-  z-index: 20;
-  box-shadow: 0 8px 24px rgba(20, 60, 100, 0.2);
-  max-width: calc(100% - 2rem);
-  justify-content: center;
+.toolbarCaptionLine {
+  min-height: 18px;
 }
 
 .toolGroup {
@@ -53,6 +77,49 @@
 .toolGroup:last-of-type {
   border-right: none;
   padding-right: 0;
+}
+
+/* Align / Space evenly: a tiny caption above the icons, since their symbols
+   (⇤ ↔ ⤒ ⋯ ...) read as decoration rather than controls without one. */
+.toolGroupLabeled {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding-right: 0.5rem;
+  border-right: 1px solid var(--surface-border);
+}
+
+.toolGroupLabeled .toolGroup {
+  border-right: none;
+  padding-right: 0;
+}
+
+.toolGroupCaption {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding-left: 0.1rem;
+  white-space: nowrap;
+}
+
+.toolGroupLabeled[data-disabled] .toolGroupCaption {
+  opacity: 0.45;
+}
+
+.toolbarHint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.toolbarFloatingWrap .toolbarHint {
+  white-space: nowrap;
+}
+
+.toolbarWrap[data-scrollable] .toolbarHint {
+  padding-left: 0.25rem;
 }
 
 .toolBtn {

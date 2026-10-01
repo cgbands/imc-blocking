@@ -7,6 +7,8 @@ export type SheetState = "peek" | "half" | "full";
 interface SheetProps {
   children: ReactNode;
   onStateChange?: (state: SheetState) => void;
+  /** Short label next to the drag handle so it reads as "drag this for X", not just an unlabeled bar. */
+  label?: string;
 }
 
 const HEIGHTS: Record<SheetState, string> = {
@@ -17,7 +19,7 @@ const HEIGHTS: Record<SheetState, string> = {
 
 const ORDER: SheetState[] = ["peek", "half", "full"];
 
-export function Sheet({ children, onStateChange }: SheetProps) {
+export function Sheet({ children, onStateChange, label }: SheetProps) {
   const [state, setStateRaw] = useState<SheetState>("half");
   const dragStart = useRef<{ y: number; state: SheetState } | null>(null);
 
@@ -47,7 +49,16 @@ export function Sheet({ children, onStateChange }: SheetProps) {
 
   return (
     <div className={styles.sheet} style={{ height: HEIGHTS[state] }}>
-      <button className={styles.handle} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onClick={cycle} aria-label="Resize panel" />
+      <button
+        className={styles.handle}
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onClick={cycle}
+        aria-label={label ? `Drag to resize ${label}` : "Resize panel"}
+      >
+        <span className={styles.handleBar} aria-hidden />
+        {label && <span className={styles.handleLabel}>{label}</span>}
+      </button>
       <div className={styles.body}>{children}</div>
     </div>
   );

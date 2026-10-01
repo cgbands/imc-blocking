@@ -19,9 +19,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   padding: max(0.5rem, env(safe-area-inset-top)) 0.75rem 0.5rem;
   min-height: 44px;
   z-index: 10;
+}
+
+.phoneTopBar .wordmark {
+  font-size: 0.82rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .phoneStage {

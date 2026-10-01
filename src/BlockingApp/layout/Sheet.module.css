@@ -19,18 +19,29 @@
   border: none;
   background: transparent;
   min-height: 32px;
+  width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.15rem;
   cursor: grab;
+  padding: 0.3rem 0 0.1rem;
 }
 
-.handle::before {
-  content: "";
+.handleBar {
   width: 40px;
   height: 4px;
   border-radius: 999px;
   background: var(--surface-border);
+}
+
+.handleLabel {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .body {
@@ -39,4 +50,13 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+}
+
+/* Each section (Setlist, Pictures, Inspector, ...) keeps its full natural
+   height and the sheet scrolls as one unit, instead of flexbox's default
+   shrink-to-fit squeezing a section down below its content — which on a
+   short "half" sheet was clipping the song list down to nothing while its
+   content still rendered, spilling past the box into the next section. */
+.body > * {
+  flex-shrink: 0;
 }
