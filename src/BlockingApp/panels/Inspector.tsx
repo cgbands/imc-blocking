@@ -39,6 +39,21 @@ export function Inspector({
         <p className={styles.inspectorHint}>
           {canEdit ? "Select a person or prop to edit it." : "Tap a person to follow their path."}
         </p>
+        <ul className={styles.inspectorTips}>
+          {canEdit ? (
+            <>
+              <li>Drag empty stage to select a group, then use Align or Space evenly.</li>
+              <li>Edits apply to the Picture you are viewing. Undo is in the toolbar.</li>
+              <li>Select a person to give them a mic or hand one off; it carries on into later Pictures.</li>
+            </>
+          ) : (
+            <>
+              <li>Use the arrows or Play under Pictures to step through the song.</li>
+              <li>Turn on Path trails to see where everyone travels.</li>
+              <li>Tap Find Me to jump to your own spot.</li>
+            </>
+          )}
+        </ul>
       </div>
     );
   }

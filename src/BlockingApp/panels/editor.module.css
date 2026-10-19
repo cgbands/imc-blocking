@@ -169,6 +169,16 @@
   color: var(--text-muted);
 }
 
+.inspectorTips {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
 .inspectorBody {
   display: flex;
   flex-direction: column;
